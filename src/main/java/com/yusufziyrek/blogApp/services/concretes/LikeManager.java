@@ -18,6 +18,7 @@ import com.yusufziyrek.blogApp.services.requests.CreateLikeForPostRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllLikesForCommentResponse;
 import com.yusufziyrek.blogApp.services.responses.GetAllLikesForPostResponse;
 import com.yusufziyrek.blogApp.services.responses.GetByIdLikeResponse;
+import com.yusufziyrek.blogApp.services.rules.LikeServiceRules;
 import com.yusufziyrek.blogApp.utilites.mappers.IModelMapperService;
 
 import lombok.AllArgsConstructor;
@@ -31,6 +32,7 @@ public class LikeManager implements ILikeService {
 	private IUserRepository userRepository;
 	private ICommentRepository commentRepository;
 	private IModelMapperService modelMapperService;
+	private LikeServiceRules serviceRules;
 
 	@Override
 	public List<GetAllLikesForPostResponse> getAllForPost(Long postId) {
@@ -69,6 +71,8 @@ public class LikeManager implements ILikeService {
 	@Override
 	public Like addLikeForPost(Long postId, CreateLikeForPostRequest createLikeForPostRequest) {
 
+		this.serviceRules.checkIfLikeAlreadyExistForPost(createLikeForPostRequest.getUserId(), postId);
+
 		Like like = new Like();
 		like.setUser(this.userRepository.findById(createLikeForPostRequest.getUserId()).orElseThrow());
 		like.setPost(this.postRepository.findById(postId).orElseThrow());
@@ -83,6 +87,8 @@ public class LikeManager implements ILikeService {
 
 	@Override
 	public Like addLikeForComment(Long commentId, CreateLikeForCommentRequest createLikeForCommentRequest) {
+
+		this.serviceRules.checkIfLikeAlreadyExistForComment(createLikeForCommentRequest.getUserId(), commentId);
 
 		Like like = new Like();
 		like.setUser(this.userRepository.findById(createLikeForCommentRequest.getUserId()).orElseThrow());
