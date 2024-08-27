@@ -1,2 +1,2 @@
 # blogApp-RestAPI
- Blogg app with users, posts, comments and likes.
+ Blog app with users, posts, comments and likes.
