@@ -1,5 +1,5 @@
 # blogApp-RestAPI
- Blog app with users, posts, comments and likes.
+ Blog app with users, posts, comments and likes. All models are interconnected and interact.
 
  # Preview
 - User operations
