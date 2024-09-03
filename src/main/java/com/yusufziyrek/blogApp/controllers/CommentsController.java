@@ -51,10 +51,10 @@ public class CommentsController {
 
 	}
 
-	@PostMapping
+	@PostMapping("/post/{postId}")
 	@ResponseStatus(code = HttpStatus.CREATED)
-	public Comment create(@RequestBody @Valid CreateCommentRequest createCommentRequest) {
-		return this.commentService.add(createCommentRequest);
+	public Comment create(@PathVariable Long postId, @RequestBody @Valid CreateCommentRequest createCommentRequest) {
+		return this.commentService.add(postId ,createCommentRequest);
 
 	}
 

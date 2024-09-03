@@ -17,7 +17,7 @@ public interface ICommentService {
 
 	GetByIdCommentResponse getById(Long id);
 
-	Comment add(CreateCommentRequest createCommentRequest);
+	Comment add(Long postId ,CreateCommentRequest createCommentRequest);
 
 	Comment update(Long id, UpdateCommentRequest updateCommentRequest);
 

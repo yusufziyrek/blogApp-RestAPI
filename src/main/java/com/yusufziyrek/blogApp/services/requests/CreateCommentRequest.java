@@ -13,9 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateCommentRequest {
 
-	@NotNull(message = "post id cannot be null")
-	@Min(value = 1, message = "post id must be at least 1 !")
-	private Long postId;
+	/*
+	 * @NotNull(message = "post id cannot be null")
+	 * 
+	 * @Min(value = 1, message = "post id must be at least 1 !") private Long
+	 * postId;
+	 */
 
 	@NotNull(message = "user id cannot be null")
 	@Min(value = 1, message = "user id must be at least 1 !")

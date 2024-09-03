@@ -69,12 +69,12 @@ public class CommentManager implements ICommentService {
 	}
 
 	@Override
-	public Comment add(CreateCommentRequest createCommentRequest) {
+	public Comment add(Long postId , CreateCommentRequest createCommentRequest) {
 
 		Comment comment = new Comment();
 		comment.setText(createCommentRequest.getText());
 		comment.setUser(this.userRepository.findById(createCommentRequest.getUserId()).orElseThrow());
-		comment.setPost(this.postRepository.findById(createCommentRequest.getPostId()).orElseThrow());
+		comment.setPost(this.postRepository.findById(postId).orElseThrow());
 		comment.setCreatedDate(new Date());
 
 		Post post = comment.getPost();

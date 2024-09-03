@@ -15,8 +15,11 @@ public class CreateLikeForCommentRequest {
 	@Min(value = 1, message = "user id must be at least 1 !")
 	private Long userId;
 
-	@NotNull(message = "comment id cannot be null !")
-	@Min(value = 1, message = "comment id must be at least 1 !")
-	private Long commentId;
+	/*
+	 * @NotNull(message = "comment id cannot be null !")
+	 * 
+	 * @Min(value = 1, message = "comment id must be at least 1 !") private Long
+	 * commentId;
+	 */
 
 }
