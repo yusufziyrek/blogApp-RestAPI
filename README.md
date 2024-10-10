@@ -50,6 +50,8 @@ BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, com
 - **`DELETE /comments/{id}`**: Delete a comment.
 
 #### **Like Management:**
+- **`GET /likes/post/{postId}`**: Returns likes for specific post.
+- **`GET /likes/comment/{commentId}`**: Returns likes for specific comment.
 - **`POST /likes/post/{postId}`**: Like a post.
 - **`POST /likes/comment/{commentId}`**: Like a comment.
 - **`DELETE /likes/{likeId}`**: Deletes likes for a post or comment.
