@@ -13,7 +13,7 @@ BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, com
 ---
 
 ### **2. Tech Stack:**
-- **Java 11 & Spring Boot:** API development, dependency injection, MVC structure.
+- **Java 21 & Spring Boot:** API development, dependency injection, MVC structure.
 - **Spring Data JPA:** For simplifying database interactions.
 - **Maven:** Project management and dependency tool.
 
