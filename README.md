@@ -1,5 +1,92 @@
-# blogApp-RestAPI
- Blog app with users, posts, comments and likes. All models are interconnected and interact.
+### BlogApp-RestAPI Documentation
+
+**Overview:**
+BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, comments, and likes. It allows comprehensive CRUD operations on users, posts, comments and likes, offering a fully-featured blog experience.
+
+---
+
+### **1. Features:**
+- **User Management:** User registration, update, delete, and listing.
+- **Post Management:** Create, read, update, delete blog posts.
+- **Comments & Likes:** Users can comment on and like posts.
+
+---
+
+### **2. Tech Stack:**
+- **Java 11 & Spring Boot:** API development, dependency injection, MVC structure.
+- **Spring Data JPA:** For simplifying database interactions.
+- **Maven:** Project management and dependency tool.
+
+---
+
+### **3. Database Structure:**
+
+- **Users:** Stores user details (ID, username, department, etc.).
+- **Posts:** Stores post details (ID, title, content, commentCount, likeCount, timestamps, etc.).
+- **Comments:** Stores comments about the post.(ID, userId, postId, likeCount, timestamps, etc.)
+- **Likes:** Stores likes of posts and comments.(ID, userId, postId, commentId, timestamps, etc.)
+
+---
+
+### **4. API Endpoints:**
+
+#### **User Management:**
+- **`GET /users`**: List all users.
+- **`GET /users/{id}`**: Returns all information for a specific user.
+- **`POST /users`**: Create a new user.
+- **`PUT /users/{id}`**: Update a user.
+- **`DELETE /users/{id}`**: Delete a user.
+
+#### **Post Management:**
+- **`GET /posts`**: List all blog posts.
+- **`GET /posts/{id}`**: Returns all information for a specific post.
+- **`POST /posts`**: Create a new blog post.
+- **`PUT /posts/{id}`**: Update a post.
+- **`DELETE /posts/{id}`**: Delete a post.
+
+#### **Comment Management:**
+- **`GET /comments/post/{postId}`**: Returns comments for a specific post.
+- **`POST /comments/post/{postId}`**: Add a new comment to a post.
+- **`DELETE /comments/{id}`**: Delete a comment.
+
+#### **Like Management:**
+- **`POST /likes/post/{postId}`**: Like a post.
+- **`POST /likes/comment/{commentId}`**: Like a comment.
+- **`DELETE /likes/{likeId}`**: Deletes likes for a post or comment.
+
+---
+
+### **5. Project Setup & Execution:**
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/yusufziyrek/blogApp-RestAPI.git
+   ```
+
+2. **Navigate to the project directory:**
+   ```bash
+   cd blogApp-RestAPI
+   ```
+
+3. **Run the application using Maven:**
+   ```bash
+   mvn spring-boot:run
+   ```
+
+You can configure the database connection by updating the `application.properties` file to support external databases like MySQL or PostgreSQL.
+
+---
+
+### **6. Future Improvements:**
+
+- **JWT Authentication & Authorization:** For secure user login and access control.
+- **Pagination & Sorting:** To handle large datasets for posts and comments.
+- **Improved Error Handling:** Better validation and custom error messages.
+- **Database Support:** Integration with other databases like MySQL and PostgreSQL.
+
+For more information, check the [GitHub repository](https://github.com/yusufziyrek/blogApp-RestAPI).
+
+#
 
  # Preview
 - User operations
