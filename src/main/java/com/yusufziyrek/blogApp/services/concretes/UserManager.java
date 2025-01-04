@@ -3,6 +3,8 @@ package com.yusufziyrek.blogApp.services.concretes;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.yusufziyrek.blogApp.entities.User;
@@ -13,6 +15,7 @@ import com.yusufziyrek.blogApp.services.requests.CreateUserRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllUsersResponse;
 import com.yusufziyrek.blogApp.services.responses.GetByIdUserResponse;
+import com.yusufziyrek.blogApp.services.responses.PageResponse;
 import com.yusufziyrek.blogApp.services.rules.UserServiceRules;
 import com.yusufziyrek.blogApp.utilites.exceptions.UserException;
 import com.yusufziyrek.blogApp.utilites.mappers.IModelMapperService;
@@ -29,15 +32,9 @@ public class UserManager implements IUserService {
 	private UserServiceRules serviceRules;
 
 	@Override
-	public List<GetAllUsersResponse> getAll() {
-
-		List<User> users = userRepository.findAll();
-
-		List<GetAllUsersResponse> usersResponse = users.stream()
-				.map(user -> this.modelMapperService.forResponse().map(user, GetAllUsersResponse.class))
-				.collect(Collectors.toList());
-
-		return usersResponse;
+	public PageResponse<GetAllUsersResponse> getAll(Pageable pageable) {
+		Page<User> products = this.userRepository.findAll(pageable);
+		return toPageResponse(products, GetAllUsersResponse.class);
 	}
 
 	@Override
@@ -85,4 +82,11 @@ public class UserManager implements IUserService {
 
 	}
 
+	private <T, U> PageResponse<U> toPageResponse(Page<T> source, Class<U> targetClass) {
+		List<U> items = source.getContent().stream()
+				.map(item -> modelMapperService.forResponse().map(item, targetClass)).collect(Collectors.toList());
+
+		return new PageResponse<>(items, source.getNumber(), source.getSize(), source.getTotalElements(),
+				source.getTotalPages());
+	}
 }

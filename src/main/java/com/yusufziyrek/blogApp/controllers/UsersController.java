@@ -1,8 +1,8 @@
 package com.yusufziyrek.blogApp.controllers;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,17 +11,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.services.abstracts.IUserService;
 import com.yusufziyrek.blogApp.services.requests.CreateUserRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdateUserRequest;
+import com.yusufziyrek.blogApp.services.responses.ApiResponse;
 import com.yusufziyrek.blogApp.services.responses.GetAllUsersResponse;
 import com.yusufziyrek.blogApp.services.responses.GetByIdUserResponse;
+import com.yusufziyrek.blogApp.services.responses.PageResponse;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -33,34 +35,37 @@ public class UsersController {
 	private IUserService userService;
 
 	@GetMapping
-	public List<GetAllUsersResponse> getAll() {
-		return this.userService.getAll();
+	public ResponseEntity<ApiResponse<PageResponse<GetAllUsersResponse>>> getAll(Pageable pageable) {
+		PageResponse<GetAllUsersResponse> users = userService.getAll(pageable);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Users retrieved successfully", users));
 	}
 
 	@GetMapping("/{id}")
-	public GetByIdUserResponse getById(@PathVariable Long id) {
-		return this.userService.getById(id);
-
+	public ResponseEntity<ApiResponse<GetByIdUserResponse>> getById(
+			@PathVariable @Positive(message = "User ID must be a positive number") Long id) {
+		GetByIdUserResponse user = userService.getById(id);
+		return ResponseEntity.ok(new ApiResponse<>(true, "User retrieved successfully", user));
 	}
 
 	@PostMapping
-	@ResponseStatus(code = HttpStatus.CREATED)
-	public User add(@RequestBody @Valid CreateUserRequest createUserRequest) {
-		return this.userService.add(createUserRequest);
+	public ResponseEntity<ApiResponse<User>> add(@RequestBody @Valid CreateUserRequest createUserRequest) {
+		User createdUser = userService.add(createUserRequest);
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(new ApiResponse<>(true, "User created successfully", createdUser));
 	}
 
 	@PutMapping("/{id}")
-	@ResponseStatus(code = HttpStatus.OK)
-	public User update(@PathVariable Long id, @RequestBody @Valid UpdateUserRequest updateUserRequest) {
-		return this.userService.update(id, updateUserRequest);
-
+	public ResponseEntity<ApiResponse<User>> update(
+			@PathVariable @Positive(message = "User ID must be a positive number") Long id,
+			@RequestBody @Valid UpdateUserRequest updateUserRequest) {
+		User updatedUser = userService.update(id, updateUserRequest);
+		return ResponseEntity.ok(new ApiResponse<>(true, "User updated successfully", updatedUser));
 	}
 
 	@DeleteMapping("/{id}")
-	@ResponseStatus(code = HttpStatus.OK)
-	public void delete(@PathVariable Long id) {
-		this.userService.delete(id);
-
+	public ResponseEntity<ApiResponse<Void>> delete(
+			@PathVariable @Positive(message = "User ID must be a positive number") Long id) {
+		userService.delete(id);
+		return ResponseEntity.ok(new ApiResponse<>(true, "User deleted successfully", null));
 	}
-
 }

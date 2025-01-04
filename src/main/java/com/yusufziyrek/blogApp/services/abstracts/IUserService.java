@@ -1,16 +1,17 @@
 package com.yusufziyrek.blogApp.services.abstracts;
 
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.services.requests.CreateUserRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllUsersResponse;
 import com.yusufziyrek.blogApp.services.responses.GetByIdUserResponse;
+import com.yusufziyrek.blogApp.services.responses.PageResponse;
 
 public interface IUserService {
 
-	List<GetAllUsersResponse> getAll();
+	PageResponse<GetAllUsersResponse> getAll(Pageable pageable);
 
 	GetByIdUserResponse getById(Long id);
 

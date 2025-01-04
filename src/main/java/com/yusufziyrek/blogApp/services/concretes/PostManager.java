@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.yusufziyrek.blogApp.entities.Post;
@@ -15,6 +17,7 @@ import com.yusufziyrek.blogApp.services.requests.CreatePostRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdatePostRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllPostsResponse;
 import com.yusufziyrek.blogApp.services.responses.GetByIdPostResponse;
+import com.yusufziyrek.blogApp.services.responses.PageResponse;
 import com.yusufziyrek.blogApp.utilites.exceptions.PostException;
 import com.yusufziyrek.blogApp.utilites.mappers.IModelMapperService;
 
@@ -29,15 +32,10 @@ public class PostManager implements IPostService {
 	private IModelMapperService modelMapperService;
 
 	@Override
-	public List<GetAllPostsResponse> getAll() {
+	public PageResponse<GetAllPostsResponse> getAll(Pageable pageable) {
 
-		List<Post> posts = postRepository.findAll();
-
-		List<GetAllPostsResponse> response = posts.stream()
-				.map(post -> this.modelMapperService.forResponse().map(post, GetAllPostsResponse.class))
-				.collect(Collectors.toList());
-
-		return response;
+		Page<Post> products = this.postRepository.findAll(pageable);
+		return toPageResponse(products, GetAllPostsResponse.class);
 	}
 
 	@Override
@@ -91,6 +89,14 @@ public class PostManager implements IPostService {
 
 		this.postRepository.deleteById(id);
 
+	}
+
+	private <T, U> PageResponse<U> toPageResponse(Page<T> source, Class<U> targetClass) {
+		List<U> items = source.getContent().stream()
+				.map(item -> modelMapperService.forResponse().map(item, targetClass)).collect(Collectors.toList());
+
+		return new PageResponse<>(items, source.getNumber(), source.getSize(), source.getTotalElements(),
+				source.getTotalPages());
 	}
 
 }
