@@ -93,40 +93,32 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
  # Preview
 - User operations
 
-![image](https://github.com/user-attachments/assets/a8a09b5a-94e5-4e8b-ade1-f8bac036179c)
-![image](https://github.com/user-attachments/assets/4d66e2d6-0960-47fc-b13c-b38e7c5d6398)
+![image](https://github.com/user-attachments/assets/7b0e6c41-89f5-400e-8b3f-434860689268)
+![image](https://github.com/user-attachments/assets/8147842a-ae8a-4105-ba89-1a202329e8eb)
+
 
 
 - Post operations
 
-![image](https://github.com/user-attachments/assets/441e6a13-492a-4ef0-b976-0d3581c3b2ff)
-![image](https://github.com/user-attachments/assets/40fd4bb3-1add-4d2f-9ec0-8ff357b93482)
+![image](https://github.com/user-attachments/assets/89504de4-3dec-486f-bf37-ad5426320a44)
+![image](https://github.com/user-attachments/assets/5f5912f1-cac1-41d5-9232-a212b15a5eee)
+
 
 
 - Comment operations
 
-![image](https://github.com/user-attachments/assets/3fc2acf3-7364-4b43-bff1-a34a512528e7)
+![image](https://github.com/user-attachments/assets/327e81c4-d692-498f-a4ab-fa1245c6350a)
 
 
 - Like operations
 
-![image](https://github.com/user-attachments/assets/5c12f27f-108f-42d5-b0b7-870712f5082a)
-![image](https://github.com/user-attachments/assets/f9352ad7-c895-49e9-836a-78ecace5cc81)
+![image](https://github.com/user-attachments/assets/17eb5e5d-3980-4016-8c4d-a37f9153c1a1)
+![image](https://github.com/user-attachments/assets/a942590b-80ae-498e-8f3e-ca450f268e40)
 
 
 # Exceptions
 
-![image](https://github.com/user-attachments/assets/5db2353d-f1c6-40f9-a8d0-f46aff37e883)
-![image](https://github.com/user-attachments/assets/89a12d46-acdb-4154-90c4-5ac832e6f09c)
-![image](https://github.com/user-attachments/assets/4a4a887c-c8be-49ae-91b7-7332972710b5)
-
-
-
-
-
-
-
-
-
-
-
+![image](https://github.com/user-attachments/assets/4945327f-d2e4-4de4-acfd-c375c4eb5389)
+![image](https://github.com/user-attachments/assets/4247b747-a1e3-4ce9-a27c-29c7b5ab4fe4)
+![image](https://github.com/user-attachments/assets/ebc8f309-fe61-48b8-a8f5-82c652b20a60)
+![image](https://github.com/user-attachments/assets/384e82b4-c77a-470b-9b35-6b227b0f89ca)
