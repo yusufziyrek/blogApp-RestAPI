@@ -82,8 +82,8 @@ You can configure the database connection by updating the `application.propertie
 ### **6. Future Improvements:**
 
 - **JWT Authentication & Authorization:** For secure user login and access control.
-- **Pagination & Sorting:** To handle large datasets for posts and comments.
-- **Improved Error Handling:** Better validation and custom error messages.
+- **Pagination & Sorting:** To handle large datasets for posts and comments. (Added)
+- **Improved Error Handling:** Better validation and custom error messages. (Added)
 - **Database Support:** Integration with other databases like MySQL and PostgreSQL.
 
 For more information, check the [GitHub repository](https://github.com/yusufziyrek/blogApp-RestAPI).
