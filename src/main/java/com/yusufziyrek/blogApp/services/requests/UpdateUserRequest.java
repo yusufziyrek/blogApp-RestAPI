@@ -16,15 +16,15 @@ public class UpdateUserRequest {
 
 	@NotEmpty(message = "first name cannot be null")
 	@Size(min = 2, max = 10, message = "first name size must be between 2 and 10 characters !")
-	private String firstName;
+	private String firstname;
 
 	@NotEmpty(message = "last name cannot be null")
 	@Size(min = 2, max = 10, message = "last name size must be between 2 and 10 characters !")
-	private String lastName;
+	private String lastname;
 
 	@NotEmpty(message = "username cannot be null")
 	@Size(min = 2, max = 20, message = "username size must be between 2 and 10 characters !")
-	private String userName;
+	private String username;
 
 	@NotEmpty(message = "password cannot be null")
 	@Size(min = 2, max = 10, message = "password name size must be between 2 and 10 characters !")

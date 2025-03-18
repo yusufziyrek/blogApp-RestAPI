@@ -3,7 +3,7 @@ package com.yusufziyrek.blogApp.services.abstracts;
 import org.springframework.data.domain.Pageable;
 
 import com.yusufziyrek.blogApp.entities.User;
-import com.yusufziyrek.blogApp.services.requests.CreateUserRequest;
+import com.yusufziyrek.blogApp.services.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllUsersResponse;
 import com.yusufziyrek.blogApp.services.responses.GetByIdUserResponse;
@@ -15,7 +15,7 @@ public interface IUserService {
 
 	GetByIdUserResponse getById(Long id);
 
-	User add(CreateUserRequest creatUserRequest);
+	User add(RegisterRequest registerUserRequest);
 
 	User update(Long id, UpdateUserRequest updateUserRequest);
 

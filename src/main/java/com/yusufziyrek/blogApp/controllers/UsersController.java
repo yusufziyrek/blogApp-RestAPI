@@ -1,13 +1,11 @@
 package com.yusufziyrek.blogApp.controllers;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.services.abstracts.IUserService;
-import com.yusufziyrek.blogApp.services.requests.CreateUserRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.services.responses.ApiResponse;
 import com.yusufziyrek.blogApp.services.responses.GetAllUsersResponse;
@@ -47,12 +44,13 @@ public class UsersController {
 		return ResponseEntity.ok(new ApiResponse<>(true, "User retrieved successfully", user));
 	}
 
-	@PostMapping
-	public ResponseEntity<ApiResponse<User>> add(@RequestBody @Valid CreateUserRequest createUserRequest) {
-		User createdUser = userService.add(createUserRequest);
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ApiResponse<>(true, "User created successfully", createdUser));
-	}
+	/*
+	 * @PostMapping public ResponseEntity<ApiResponse<User>> add(@RequestBody @Valid
+	 * CreateUserRequest createUserRequest) { User createdUser =
+	 * userService.add(createUserRequest); return
+	 * ResponseEntity.status(HttpStatus.CREATED) .body(new ApiResponse<>(true,
+	 * "User created successfully", createdUser)); }
+	 */
 
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<User>> update(

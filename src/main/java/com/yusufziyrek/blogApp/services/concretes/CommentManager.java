@@ -39,7 +39,7 @@ public class CommentManager implements ICommentService {
 					GetAllCommentsForPostResponse.class);
 
 			commentResponse.setPostTitle(comment.getPost().getTitle());
-			commentResponse.setAuthorUser(comment.getUser().getUserName());
+			commentResponse.setAuthorUser(comment.getUser().getUsername());
 			return commentResponse;
 		}).collect(Collectors.toList());
 

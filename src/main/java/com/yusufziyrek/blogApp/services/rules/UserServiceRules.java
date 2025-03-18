@@ -14,7 +14,7 @@ public class UserServiceRules {
 	private IUserRepository userRepository;
 
 	public void checkIfUserNameExists(String userName) {
-		if (this.userRepository.existsByUserName(userName)) {
+		if (this.userRepository.existsByUsername(userName)) {
 			throw new UserException("Username already exists !");
 
 		}

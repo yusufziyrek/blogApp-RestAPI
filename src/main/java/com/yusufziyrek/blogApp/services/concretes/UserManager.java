@@ -11,7 +11,7 @@ import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.repos.IUserRepository;
 import com.yusufziyrek.blogApp.services.abstracts.IPostService;
 import com.yusufziyrek.blogApp.services.abstracts.IUserService;
-import com.yusufziyrek.blogApp.services.requests.CreateUserRequest;
+import com.yusufziyrek.blogApp.services.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllUsersResponse;
 import com.yusufziyrek.blogApp.services.responses.GetByIdUserResponse;
@@ -50,11 +50,11 @@ public class UserManager implements IUserService {
 	}
 
 	@Override
-	public User add(CreateUserRequest creatUserRequest) {
+	public User add(RegisterRequest registerUserRequest) {
 
-		this.serviceRules.checkIfUserNameExists(creatUserRequest.getUserName());
+		this.serviceRules.checkIfUserNameExists(registerUserRequest.getUsername());
 
-		User user = this.modelMapperService.forRequest().map(creatUserRequest, User.class);
+		User user = this.modelMapperService.forRequest().map(registerUserRequest, User.class);
 
 		return this.userRepository.save(user);
 
@@ -64,9 +64,9 @@ public class UserManager implements IUserService {
 	public User update(Long id, UpdateUserRequest updateUserRequest) {
 
 		User user = this.userRepository.findById(id).orElseThrow(() -> new UserException("User id not exist !"));
-		user.setUserName(updateUserRequest.getUserName());
-		user.setFirstName(updateUserRequest.getFirstName());
-		user.setLastName(updateUserRequest.getLastName());
+		user.setUsername(updateUserRequest.getUsername());
+		user.setFirstname(updateUserRequest.getFirstname());
+		user.setLastname(updateUserRequest.getLastname());
 		user.setPassword(updateUserRequest.getPassword());
 		user.setDepartmant(updateUserRequest.getDepartmant());
 		user.setAge(updateUserRequest.getAge());
