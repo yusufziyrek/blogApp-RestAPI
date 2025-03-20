@@ -124,7 +124,8 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
 # **Preview**
 - **User operations**
   
-  ![image](https://github.com/user-attachments/assets/7b0e6c41-89f5-400e-8b3f-434860689268)
+  ![image](https://github.com/user-attachments/assets/8381ac64-f820-40a5-923a-6346b743b523)
+  ![image](https://github.com/user-attachments/assets/f38bff4e-10f3-4e74-8a4a-fb5358042a7c)
   ![image](https://github.com/user-attachments/assets/8147842a-ae8a-4105-ba89-1a202329e8eb)
 
 - **Post operations**
