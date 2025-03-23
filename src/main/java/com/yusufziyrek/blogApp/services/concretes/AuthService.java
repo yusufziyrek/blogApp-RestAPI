@@ -2,7 +2,6 @@ package com.yusufziyrek.blogApp.services.concretes;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +12,7 @@ import com.yusufziyrek.blogApp.security.JwtUtil;
 import com.yusufziyrek.blogApp.services.requests.LoginRequest;
 import com.yusufziyrek.blogApp.services.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.services.responses.AuthResponse;
+import com.yusufziyrek.blogApp.utilites.exceptions.AuthException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +28,7 @@ public class AuthService {
 	public String register(RegisterRequest request) {
 		if (userRepository.existsByEmail(request.getEmail())
 				|| userRepository.existsByUsername(request.getUsername())) {
-			throw new IllegalArgumentException("Email or Username already in use!");
+			throw new AuthException("Email or Username already in use!");
 		}
 
 		User user = new User();
@@ -49,7 +49,7 @@ public class AuthService {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.getUsernameOrEmail(), request.getPassword()));
 		User user = userRepository.findByEmailOrUsername(request.getUsernameOrEmail(), request.getUsernameOrEmail())
-				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+				.orElseThrow(() -> new AuthException("User not found"));
 		String token = jwtUtil.generateToken(user.getEmail());
 		return new AuthResponse(token, "Login successful!");
 	}

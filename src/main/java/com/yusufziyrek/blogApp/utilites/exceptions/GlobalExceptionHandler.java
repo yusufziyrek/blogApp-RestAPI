@@ -44,6 +44,13 @@ public class GlobalExceptionHandler {
 				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
 		return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
 	}
+	
+	@ExceptionHandler(AuthException.class)
+	public ResponseEntity<CustomProblemDetail> handleAuthException(AuthException ex, WebRequest request) {
+		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.UNAUTHORIZED.value(), ex.getMessage(),
+				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
+		return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
+	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<CustomProblemDetail> handleValidationExceptions(MethodArgumentNotValidException ex,
