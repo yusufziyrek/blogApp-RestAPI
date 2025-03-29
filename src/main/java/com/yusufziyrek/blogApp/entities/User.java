@@ -67,6 +67,8 @@ public class User implements UserDetails {
 
 	@Enumerated(EnumType.STRING)
 	private Role role;
+	
+	private boolean enabled = false;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
