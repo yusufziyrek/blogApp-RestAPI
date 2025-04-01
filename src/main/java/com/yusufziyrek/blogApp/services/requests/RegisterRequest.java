@@ -19,11 +19,11 @@ import lombok.Setter;
 public class RegisterRequest {
 
 	@NotEmpty(message = "First name cannot be null")
-	@Size(min = 2, max = 10, message = "First name size must be between 2 and 10 characters")
+	@Size(min = 2, max = 20, message = "First name size must be between 2 and 15 characters")
 	private String firstname;
 
 	@NotEmpty(message = "Last name cannot be null")
-	@Size(min = 2, max = 10, message = "Last name size must be between 2 and 10 characters")
+	@Size(min = 2, max = 20, message = "Last name size must be between 2 and 10 characters")
 	private String lastname;
 
 	@NotBlank(message = "Username cannot be empty")

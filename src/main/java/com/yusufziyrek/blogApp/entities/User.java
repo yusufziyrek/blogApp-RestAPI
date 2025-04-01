@@ -39,7 +39,7 @@ public class User implements UserDetails {
 
 	@Column(name = "first_name")
 	private String firstname;
-	
+
 	@Column(name = "last_name")
 	private String lastname;
 
@@ -67,7 +67,7 @@ public class User implements UserDetails {
 
 	@Enumerated(EnumType.STRING)
 	private Role role;
-	
+
 	private boolean enabled = false;
 
 	@Override
@@ -87,11 +87,6 @@ public class User implements UserDetails {
 
 	@Override
 	public boolean isCredentialsNonExpired() {
-		return true;
-	}
-
-	@Override
-	public boolean isEnabled() {
 		return true;
 	}
 
