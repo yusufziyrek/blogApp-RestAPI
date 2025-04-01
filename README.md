@@ -1,7 +1,7 @@
 ### BlogApp-RestAPI Documentation
 
 **Overview:**  
-BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, comments, and likes. It allows comprehensive CRUD operations on users, posts, comments, and likes, offering a fully-featured blog experience with secure authentication and authorization.
+BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, comments, and likes. It allows comprehensive CRUD operations on users, posts, comments, and likes, offering a fully-featured blog experience with secure authentication, authorization, and email verification.
 
 ---
 
@@ -10,6 +10,7 @@ BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, com
 - **Post Management:** Create, read, update, delete blog posts.
 - **Comments & Likes:** Users can comment on and like posts.
 - **JWT Authentication & Security:** Secured endpoints with JWT-based authentication and role-based access control.
+- **Email Verification:** New users must verify their email addresses to activate their accounts. A verification link is sent to the user’s email upon registration.
 
 ---
 
@@ -28,14 +29,16 @@ BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, com
 - **Comments:** Stores comments about the post. (ID, userId, postId, likeCount, timestamps, etc.)
 - **Likes:** Stores likes of posts and comments. (ID, userId, postId, commentId, timestamps, etc.)
 - **JWT Tokens:** Used for authentication and authorization.
+- **Email Verification Tokens:** Stores tokens used for verifying user email addresses.
 
 ---
 
 ### **4. API Endpoints:**
 
 #### **Authentication & Security:**
-- **`POST /auth/register`**: Registers a new user.
+- **`POST /auth/register`**: Registers a new user and triggers email verification.
 - **`POST /auth/login`**: Authenticates a user and returns a JWT token.
+- **`GET /auth/verify-email?token={token}`**: Verifies the user’s email address using the token sent to their inbox.
 
 #### **User Management:**
 - **`GET /users`**: List all users.
@@ -64,57 +67,80 @@ BlogApp-RestAPI is a RESTful API enabling users to interact with blog posts, com
 
 ---
 
-### **5. JWT Authentication & Security Updates**
-- **JWT-Based Authentication:** Each request to a protected endpoint requires a valid JWT token.
-- **Spring Security Integration:** Secure access using role-based permissions.
-- **Token Expiration Handling:** Ensures secure session management.
+## **5. JWT Authentication & Security Updates**
 
-#### **How JWT Works**
-1. A user registers via `POST /auth/register`.
-2. The user logs in via `POST /auth/login` and receives a JWT token.
-3. The JWT token is included in the `Authorization` header for future requests:
-   ```
-   Authorization: Bearer <JWT_TOKEN>
-   ```
-4. The API validates the token before granting access.
+- **JWT-Based Authentication**  
+  Each request to a protected endpoint requires a valid JWT token. Users obtain this token upon successful login and must include it in the `Authorization` header:
+
+  ```http
+  Authorization: Bearer <JWT_TOKEN>
+  ```
+
+- **Spring Security Integration**  
+  Uses role-based permissions to control access to various endpoints.
+
+- **Token Expiration Handling**  
+  Includes token validity checks to ensure sessions are managed securely.
+
+- **Email Verification Flow**  
+  1. **User Registration**: A new user registers via `POST /auth/register`.  
+  2. **Verification Link**: The system sends a verification link to the user’s email.  
+  3. **Account Activation**: The user clicks the link (`GET /auth/verify-email?token=<TOKEN>`) to activate their account.  
+  4. **Authentication**: Once verified, the user can log in and receive a JWT token.
 
 ---
 
-### **6. Project Setup & Execution:**
+## **6. Project Setup & Execution**
 
-1. **Clone the Repository:**
+1. **Clone the Repository**  
    ```bash
    git clone https://github.com/yusufziyrek/blogApp-RestAPI.git
    ```
 
-2. **Navigate to the project directory:**
+2. **Navigate to the Project Directory**  
    ```bash
    cd blogApp-RestAPI
    ```
 
-3. **Run the application using Maven:**
+3. **Run the Application Using Maven**  
    ```bash
    mvn spring-boot:run
    ```
 
-4. **Configure JWT Secret Key in `application.properties`**
-   ```
+4. **Configure JWT and Email Settings**  
+   In your `application.properties`, set the following (as an example):
+
+   ```properties
+   # JWT Secret Key
    jwt.secret-key=YourSecureSecretKey
+
+   # Email Configuration (e.g., Gmail SMTP)
+   spring.mail.host=smtp.gmail.com
+   spring.mail.port=587
+   spring.mail.username=your-email@gmail.com
+   spring.mail.password=your-email-password
+   spring.mail.properties.mail.smtp.auth=true
+   spring.mail.properties.mail.smtp.starttls.enable=true
    ```
 
-5. **Test authentication using Postman or curl**
-   ```bash
-   curl -X POST http://localhost:8080/auth/login -H "Content-Type: application/json" -d '{"username":"user1","password":"password"}'
-   ```
+5. **Test Endpoints**  
+   - **Authentication**  
+     ```bash
+     curl -X POST http://localhost:8080/auth/login \
+          -H "Content-Type: application/json" \
+          -d '{"username":"user1","password":"password"}'
+     ```
+   - **Email Verification**  
+     Check your inbox for a verification link and open it in a browser (e.g., `GET /auth/verify-email?token=<TOKEN>`).
 
-You can configure the database connection by updating the `application.properties` file to support external databases like MySQL or PostgreSQL.
+6. **Database Configuration**  
+   Update the relevant properties in `application.properties` (or `application.yml`) to point to your preferred database (MySQL, PostgreSQL, etc.).
 
 ---
 
 ### **7. Future Improvements:**
 - **OAuth2 Support:** Enable social login via Google and GitHub.
 - **2FA (Two-Factor Authentication):** Enhance security with OTP-based login.
-- **Email Verification:** Require email confirmation for new users.
 - **Admin Panel:** Provide a web interface for managing users, posts, and comments.
 
 For more information, check the [GitHub repository](https://github.com/yusufziyrek/blogApp-RestAPI).
