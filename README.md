@@ -148,11 +148,14 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
 ---
 
 # **Preview**
-- **User operations**
+- **Auth operations**
   
   ![image](https://github.com/user-attachments/assets/8381ac64-f820-40a5-923a-6346b743b523)
+  ![image](https://github.com/user-attachments/assets/162a6931-77cf-4f64-b37d-e4bf1788bfe5)
+  ![image](https://github.com/user-attachments/assets/a039a244-f15a-4827-9e99-722903d041aa)
   ![image](https://github.com/user-attachments/assets/f38bff4e-10f3-4e74-8a4a-fb5358042a7c)
-  ![image](https://github.com/user-attachments/assets/8147842a-ae8a-4105-ba89-1a202329e8eb)
+  ![image](https://github.com/user-attachments/assets/7904d994-5cd2-4153-a8b7-087cb172c124)
+
 
 - **Post operations**
 
