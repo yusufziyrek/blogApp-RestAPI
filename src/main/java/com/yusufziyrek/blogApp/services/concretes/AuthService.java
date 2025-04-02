@@ -14,6 +14,7 @@ import com.yusufziyrek.blogApp.entities.VerificationToken;
 import com.yusufziyrek.blogApp.repos.IUserRepository;
 import com.yusufziyrek.blogApp.repos.IVerificationTokenRepository;
 import com.yusufziyrek.blogApp.security.JwtUtil;
+import com.yusufziyrek.blogApp.services.abstracts.IAuthService;
 import com.yusufziyrek.blogApp.services.requests.LoginRequest;
 import com.yusufziyrek.blogApp.services.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.services.responses.AuthResponse;
@@ -23,14 +24,14 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthService implements IAuthService {
 
 	private final IUserRepository userRepository;
 	private final IVerificationTokenRepository verificationTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final AuthenticationManager authenticationManager;
-	private final EmailService emailService;
+	//private final EmailService emailService;
 
 	public String register(RegisterRequest request) {
 
@@ -44,7 +45,7 @@ public class AuthService {
 		user.setUsername(request.getUsername());
 		user.setFirstname(request.getFirstname());
 		user.setLastname(request.getLastname());
-		user.setDepartmant(request.getDepartmant());
+		user.setDepartment(request.getDepartmant());
 		user.setAge(request.getAge());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setRole(Role.USER);
@@ -58,7 +59,7 @@ public class AuthService {
 		verificationToken.setExpiryDate(LocalDateTime.now().plusDays(1));
 		verificationTokenRepository.save(verificationToken);
 
-		emailService.sendVerificationEmail(user.getEmail(), token);
+		//emailService.sendVerificationEmail(user.getEmail(), token);
 
 		return "User registered successfully! Please verify your email to activate your account.";
 	}

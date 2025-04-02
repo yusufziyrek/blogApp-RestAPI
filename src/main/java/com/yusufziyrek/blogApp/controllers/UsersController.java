@@ -44,14 +44,6 @@ public class UsersController {
 		return ResponseEntity.ok(new ApiResponse<>(true, "User retrieved successfully", user));
 	}
 
-	/*
-	 * @PostMapping public ResponseEntity<ApiResponse<User>> add(@RequestBody @Valid
-	 * CreateUserRequest createUserRequest) { User createdUser =
-	 * userService.add(createUserRequest); return
-	 * ResponseEntity.status(HttpStatus.CREATED) .body(new ApiResponse<>(true,
-	 * "User created successfully", createdUser)); }
-	 */
-
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<User>> update(
 			@PathVariable @Positive(message = "User ID must be a positive number") Long id,

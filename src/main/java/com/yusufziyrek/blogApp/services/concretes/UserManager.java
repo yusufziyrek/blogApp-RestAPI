@@ -68,7 +68,7 @@ public class UserManager implements IUserService {
 		user.setFirstname(updateUserRequest.getFirstname());
 		user.setLastname(updateUserRequest.getLastname());
 		user.setPassword(updateUserRequest.getPassword());
-		user.setDepartmant(updateUserRequest.getDepartmant());
+		user.setDepartment(updateUserRequest.getDepartmant());
 		user.setAge(updateUserRequest.getAge());
 
 		return this.userRepository.save(user);

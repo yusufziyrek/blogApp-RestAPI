@@ -2,11 +2,12 @@ package com.yusufziyrek.blogApp.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Table(name = "verification_tokens")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class VerificationToken {
@@ -18,7 +19,8 @@ public class VerificationToken {
 	private String token;
 
 	private LocalDateTime expiryDate;
-	
-	@OneToOne
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private User user;
 }
