@@ -11,7 +11,7 @@ public class GetAllUsersResponse {
 
 	private Long id;
 	private String userName;
-	private String departmant;
+	private String department;
 	private int age;
 
 }

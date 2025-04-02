@@ -2,18 +2,17 @@ package com.yusufziyrek.blogApp.services.concretes;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
 	private final JavaMailSender mailSender;
-
-	public EmailService(JavaMailSender mailSender) {
-		this.mailSender = mailSender;
-	}
 
 	public void sendVerificationEmail(String toEmail, String token) {
 		try {

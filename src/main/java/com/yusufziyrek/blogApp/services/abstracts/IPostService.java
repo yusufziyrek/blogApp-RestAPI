@@ -23,6 +23,6 @@ public interface IPostService {
 
 	Post update(Long id, UpdatePostRequest updatePostRequest);
 
-	void delete(Long id);
+	Long delete(Long id);
 
 }

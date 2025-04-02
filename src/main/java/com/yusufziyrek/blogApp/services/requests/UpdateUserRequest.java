@@ -32,7 +32,7 @@ public class UpdateUserRequest {
 
 	@NotEmpty(message = "departmant cannot be null")
 	@Size(min = 2, max = 20, message = "departman size must be between 2 and 10 characters !")
-	private String departmant;
+	private String department;
 
 	@NotNull(message = "age cannot be null")
 	@Min(value = 18, message = "the age value must be at least 18 !")

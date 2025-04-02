@@ -40,7 +40,7 @@ public class RegisterRequest {
 
 	@NotEmpty(message = "Department cannot be null")
 	@Size(min = 2, max = 25, message = "Department size must be between 2 and 25 characters")
-	private String departmant;
+	private String department;
 
 	@NotNull(message = "Age cannot be null")
 	@Min(value = 18, message = "The age value must be at least 18")

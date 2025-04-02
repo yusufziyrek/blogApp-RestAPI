@@ -1,10 +1,12 @@
 package com.yusufziyrek.blogApp.services.concretes;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,46 +23,47 @@ import com.yusufziyrek.blogApp.services.responses.PageResponse;
 import com.yusufziyrek.blogApp.utilites.exceptions.PostException;
 import com.yusufziyrek.blogApp.utilites.mappers.IModelMapperService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PostManager implements IPostService {
 
-	private IPostRepository postRepository;
-	private IUserRepository userRepository;
-	private IModelMapperService modelMapperService;
+	private final IPostRepository postRepository;
+	private final IUserRepository userRepository;
+	private final IModelMapperService modelMapperService;
 
 	@Override
+	@Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
 	public PageResponse<GetAllPostsResponse> getAll(Pageable pageable) {
-
 		Page<Post> products = this.postRepository.findAll(pageable);
 		return toPageResponse(products, GetAllPostsResponse.class);
 	}
 
 	@Override
+	@Cacheable(value = "postDetails", key = "#id")
 	public GetByIdPostResponse getById(Long id) {
+		Post post = this.postRepository.findById(id)
+				.orElseThrow(() -> new PostException("Post id not exist !"));
 
-		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
-
-		GetByIdPostResponse response = this.modelMapperService.forResponse().map(post, GetByIdPostResponse.class);
-
-		return response;
+		return this.modelMapperService.forResponse().map(post, GetByIdPostResponse.class);
 	}
 
 	@Override
+	@Cacheable(value = "userPostTitles", key = "#userId")
 	public List<String> getPostForUser(Long userId) {
-		List<Post> userPosts = postRepository.findByUserId(userId);
-		List<String> postTitles = new ArrayList<>();
-		for (Post post : userPosts) {
-			postTitles.add(post.getTitle());
-		}
-		return postTitles;
+		return postRepository.findByUserId(userId)
+			.stream()
+			.map(Post::getTitle)
+			.collect(Collectors.toList());
 	}
-
+	
 	@Override
+	@Caching(evict = {
+		@CacheEvict(value = "allPosts", allEntries = true),
+		@CacheEvict(value = "userPostTitles", key = "#createPostRequest.userId")
+	})
 	public Post createPost(CreatePostRequest createPostRequest) {
-
 		Post post = new Post();
 		post.setUser(this.userRepository.findById(createPostRequest.getUserId())
 				.orElseThrow(() -> new PostException("User id not exist !")));
@@ -70,13 +73,16 @@ public class PostManager implements IPostService {
 		post.setUpdatedDate(new Date());
 
 		return this.postRepository.save(post);
-
 	}
 
 	@Override
+	@Caching(evict = {
+		@CacheEvict(value = "postDetails", key = "#id"),
+		@CacheEvict(value = "allPosts", allEntries = true)
+	})
 	public Post update(Long id, UpdatePostRequest updatePostRequest) {
-
-		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
+		Post post = this.postRepository.findById(id)
+				.orElseThrow(() -> new PostException("Post id not exist !"));
 		post.setTitle(updatePostRequest.getTitle());
 		post.setText(updatePostRequest.getText());
 		post.setUpdatedDate(new Date());
@@ -85,10 +91,19 @@ public class PostManager implements IPostService {
 	}
 
 	@Override
-	public void delete(Long id) {
+	@Caching(evict = {
+		@CacheEvict(value = "postDetails", key = "#id"),
+		@CacheEvict(value = "allPosts", allEntries = true),
+		@CacheEvict(value = "userPostTitles", key = "#result") 
+	})
+	public Long delete(Long id) {
+		Post post = this.postRepository.findById(id)
+				.orElseThrow(() -> new PostException("Post id not exist !"));
 
+		Long userId = post.getUser().getId();
 		this.postRepository.deleteById(id);
 
+		return userId; 
 	}
 
 	private <T, U> PageResponse<U> toPageResponse(Page<T> source, Class<U> targetClass) {
@@ -98,5 +113,4 @@ public class PostManager implements IPostService {
 		return new PageResponse<>(items, source.getNumber(), source.getSize(), source.getTotalElements(),
 				source.getTotalPages());
 	}
-
 }

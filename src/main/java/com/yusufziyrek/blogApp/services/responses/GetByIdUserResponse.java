@@ -15,7 +15,7 @@ public class GetByIdUserResponse {
 	private String userName;
 	private String firstName;
 	private String lastName;
-	private String departmant;
+	private String department;
 	private int age;
 	private List<String> titles;
 

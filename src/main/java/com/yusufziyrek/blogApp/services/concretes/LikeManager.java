@@ -21,18 +21,18 @@ import com.yusufziyrek.blogApp.services.responses.GetByIdLikeResponse;
 import com.yusufziyrek.blogApp.services.rules.LikeServiceRules;
 import com.yusufziyrek.blogApp.utilites.mappers.IModelMapperService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LikeManager implements ILikeService {
 
-	private ILikeRepository likeRepository;
-	private IPostRepository postRepository;
-	private IUserRepository userRepository;
-	private ICommentRepository commentRepository;
-	private IModelMapperService modelMapperService;
-	private LikeServiceRules serviceRules;
+	private final ILikeRepository likeRepository;
+	private final IPostRepository postRepository;
+	private final IUserRepository userRepository;
+	private final ICommentRepository commentRepository;
+	private final IModelMapperService modelMapperService;
+	private final LikeServiceRules serviceRules;
 
 	@Override
 	public List<GetAllLikesForPostResponse> getAllForPost(Long postId) {

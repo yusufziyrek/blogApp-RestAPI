@@ -45,7 +45,7 @@ public class AuthService implements IAuthService {
 		user.setUsername(request.getUsername());
 		user.setFirstname(request.getFirstname());
 		user.setLastname(request.getLastname());
-		user.setDepartment(request.getDepartmant());
+		user.setDepartment(request.getDepartment());
 		user.setAge(request.getAge());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setRole(Role.USER);
