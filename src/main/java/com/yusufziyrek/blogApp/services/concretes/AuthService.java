@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.yusufziyrek.blogApp.entities.RefreshToken;
 import com.yusufziyrek.blogApp.entities.Role;
 import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.entities.VerificationToken;
@@ -28,10 +29,11 @@ public class AuthService implements IAuthService {
 
 	private final IUserRepository userRepository;
 	private final IVerificationTokenRepository verificationTokenRepository;
+	private final RefreshTokenService refreshTokenService;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final AuthenticationManager authenticationManager;
-	//private final EmailService emailService;
+	// private final EmailService emailService;
 
 	public String register(RegisterRequest request) {
 
@@ -59,7 +61,7 @@ public class AuthService implements IAuthService {
 		verificationToken.setExpiryDate(LocalDateTime.now().plusDays(1));
 		verificationTokenRepository.save(verificationToken);
 
-		//emailService.sendVerificationEmail(user.getEmail(), token);
+		// emailService.sendVerificationEmail(user.getEmail(), token);
 
 		return "User registered successfully! Please verify your email to activate your account.";
 	}
@@ -76,8 +78,10 @@ public class AuthService implements IAuthService {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.getUsernameOrEmail(), request.getPassword()));
 
-		String token = jwtUtil.generateToken(user.getEmail());
-		return new AuthResponse(token, "Login successful!");
+		String accessToken = jwtUtil.generateToken(user.getEmail());
+		RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+		return new AuthResponse(accessToken, refreshToken.getToken(), "Login successful!");
 	}
 
 	public String verifyAccount(String token) {

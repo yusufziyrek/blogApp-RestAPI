@@ -25,15 +25,15 @@ import com.yusufziyrek.blogApp.services.responses.GetByIdCommentResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/comments")
 @Validated
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CommentsController {
 
-	private ICommentService commentService;
+	private final ICommentService commentService;
 
 	@GetMapping("/post/{postId}")
 	public ResponseEntity<ApiResponse<List<GetAllCommentsForPostResponse>>> getAllForPost(

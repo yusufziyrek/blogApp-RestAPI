@@ -24,15 +24,15 @@ import com.yusufziyrek.blogApp.services.responses.PageResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/posts")
 @Validated
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PostsController {
 
-	private IPostService postService;
+	private final IPostService postService;
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<PageResponse<GetAllPostsResponse>>> getAll(Pageable pageable) {

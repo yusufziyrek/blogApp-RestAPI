@@ -21,15 +21,15 @@ import com.yusufziyrek.blogApp.services.responses.PageResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/users")
 @Validated
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UsersController {
 
-	private IUserService userService;
+	private final IUserService userService;
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<PageResponse<GetAllUsersResponse>>> getAll(Pageable pageable) {

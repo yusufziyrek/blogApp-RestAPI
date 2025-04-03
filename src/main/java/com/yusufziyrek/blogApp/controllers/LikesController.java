@@ -24,15 +24,15 @@ import com.yusufziyrek.blogApp.services.responses.GetByIdLikeResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/likes")
 @Validated
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LikesController {
 
-	private ILikeService likeService;
+	private final ILikeService likeService;
 
 	@GetMapping("/post/{postId}")
 	public ResponseEntity<ApiResponse<List<GetAllLikesForPostResponse>>> getAllForPost(
