@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 import com.yusufziyrek.blogApp.entities.Post;
+import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.services.requests.CreatePostRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdatePostRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllPostsResponse;
@@ -19,10 +20,9 @@ public interface IPostService {
 
 	GetByIdPostResponse getById(Long id);
 
-	Post createPost(CreatePostRequest createPostRequest);
+	Post createPost(CreatePostRequest createPostRequest, User user);
 
-	Post update(Long id, UpdatePostRequest updatePostRequest);
+	Post update(Long id, UpdatePostRequest updatePostRequest, User user);
 
-	Long delete(Long id);
-
+	Long delete(Long id, User user);
 }

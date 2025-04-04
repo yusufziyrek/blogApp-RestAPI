@@ -58,7 +58,7 @@ public class AuthController {
 			throw new AuthException("Refresh token not found!");
 		}
 		var refreshToken = refreshTokenService.verifyExpiration(optionalToken.get());
-		String newAccessToken = jwtUtil.generateToken(refreshToken.getUser().getEmail());
+		String newAccessToken = jwtUtil.generateToken(refreshToken.getUser().getEmail(), refreshToken.getUser().getId());
 		return ResponseEntity.ok(Map.of("accessToken", newAccessToken, "refreshToken", refreshToken.getToken()));
 	}
 }

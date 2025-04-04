@@ -3,6 +3,7 @@ package com.yusufziyrek.blogApp.controllers;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yusufziyrek.blogApp.entities.Post;
+import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.services.abstracts.IPostService;
 import com.yusufziyrek.blogApp.services.requests.CreatePostRequest;
 import com.yusufziyrek.blogApp.services.requests.UpdatePostRequest;
@@ -48,8 +50,9 @@ public class PostsController {
 	}
 
 	@PostMapping
-	public ResponseEntity<ApiResponse<Post>> createPost(@RequestBody @Valid CreatePostRequest createPostRequest) {
-		Post createdPost = postService.createPost(createPostRequest);
+	public ResponseEntity<ApiResponse<Post>> createPost(@RequestBody @Valid CreatePostRequest createPostRequest,
+			@AuthenticationPrincipal User user) {
+		Post createdPost = postService.createPost(createPostRequest, user);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new ApiResponse<>(true, "Post created successfully", createdPost));
 	}
@@ -57,15 +60,16 @@ public class PostsController {
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<Post>> update(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long id,
-			@RequestBody @Valid UpdatePostRequest updatePostRequest) {
-		Post updatedPost = postService.update(id, updatePostRequest);
+			@RequestBody @Valid UpdatePostRequest updatePostRequest, @AuthenticationPrincipal User user) {
+		Post updatedPost = postService.update(id, updatePostRequest, user);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Post updated successfully", updatedPost));
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Void>> delete(
-			@PathVariable @Positive(message = "Post ID must be a positive number") Long id) {
-		postService.delete(id);
+			@PathVariable @Positive(message = "Post ID must be a positive number") Long id,
+			@AuthenticationPrincipal User user) {
+		postService.delete(id, user);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Post deleted successfully", null));
 	}
 }
