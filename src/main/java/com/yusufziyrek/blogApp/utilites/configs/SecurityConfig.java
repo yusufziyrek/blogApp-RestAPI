@@ -37,16 +37,13 @@ public class SecurityConfig {
         http
            .csrf(csrf -> csrf.disable())
            .authorizeHttpRequests(auth -> auth
-               // Auth işlemleri ve arama işlemleri herkese açık olsun:
                .requestMatchers(API_BASE + "/auth/**").permitAll()
                .requestMatchers(HttpMethod.GET,
                    API_BASE + "/posts/**",
                    API_BASE + "/comments/**",
                    API_BASE + "/likes/**",
                    API_BASE + "/search/**").permitAll()
-               // Diğer GET istekleri için: örneğin, kullanıcı detaylarına erişim için kimlik doğrulaması gerekebilir.
                .requestMatchers(API_BASE + "/users/**").authenticated()
-               // POST, PUT, DELETE işlemleri kimlik doğrulamalı olsun
                .requestMatchers(HttpMethod.POST,
                    API_BASE + "/posts/**",
                    API_BASE + "/comments/**",
