@@ -55,11 +55,11 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 ### **4. API Endpoints:**
 
 #### **Authentication & Security:**
-- **`POST /auth/register`**:  
+- **`POST /api/v1/auth/register`**:  
   Registers a new user and triggers email verification.
-- **`POST /auth/login`**:  
+- **`POST /api/v1/auth/login`**:  
   Authenticates a user and returns a JWT token.
-- **`GET /auth/verify-email?token={token}`**:  
+- **`GET /api/v1/auth/verify-email?token={token}`**:  
   Verifies the user’s email using the provided token.
 
 #### **User Management:**
