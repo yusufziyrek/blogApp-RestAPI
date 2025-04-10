@@ -63,45 +63,45 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
   Verifies the user’s email using the provided token.
 
 #### **User Management:**
-- **`GET /users`**:  
+- **`GET /api/v1/users`**:  
   Lists all users.
-- **`GET /users/{id}`**:  
+- **`GET /api/v1/users/{id}`**:  
   Returns information for a specific user.
-- **`PUT /users/{id}`**:  
+- **`PUT /api/v1/users/{id}`**:  
   Updates user details.
-- **`DELETE /users/{id}`**:  
+- **`DELETE /api/v1/users/{id}`**:  
   Deletes a user.
 
 #### **Post Management:**
-- **`GET /posts`**:  
+- **`GET /api/v1/posts`**:  
   Lists all blog posts.
-- **`GET /posts/{id}`**:  
+- **`GET /api/v1/posts/{id}`**:  
   Returns details for a specific post.
-- **`POST /posts`**:  
+- **`POST /api/v1/posts`**:  
   Creates a new blog post (Requires authentication).
-- **`PUT /posts/{id}`**:  
+- **`PUT /api/v1/posts/{id}`**:  
   Updates a post (Requires authentication).
-- **`DELETE /posts/{id}`**:  
+- **`DELETE /api/v1/posts/{id}`**:  
   Deletes a post (Requires authentication).
 
 #### **Comment Management:**
-- **`GET /comments/post/{postId}`**:  
+- **`GET /api/v1/comments/post/{postId}`**:  
   Returns comments for a specific post.
-- **`POST /comments/post/{postId}`**:  
+- **`POST /api/v1/comments/post/{postId}`**:  
   Adds a new comment to a post (Requires authentication).
-- **`DELETE /comments/{id}`**:  
+- **`DELETE /api/v1/comments/{id}`**:  
   Deletes a comment (Requires authentication).
 
 #### **Like Management:**
-- **`GET /likes/post/{postId}`**:  
+- **`GET /api/v1/likes/post/{postId}`**:  
   Returns likes for a specific post.
-- **`GET /likes/comment/{commentId}`**:  
+- **`GET /api/v1/likes/comment/{commentId}`**:  
   Returns likes for a specific comment.
-- **`POST /likes/post/{postId}`**:  
+- **`POST /api/v1/likes/post/{postId}`**:  
   Likes a post (Requires authentication).
-- **`POST /likes/comment/{commentId}`**:  
+- **`POST /api/v1/likes/comment/{commentId}`**:  
   Likes a comment (Requires authentication).
-- **`DELETE /likes/{likeId}`**:  
+- **`DELETE /api/v1/likes/{likeId}`**:  
   Deletes a like (Requires authentication).
 
 ---
