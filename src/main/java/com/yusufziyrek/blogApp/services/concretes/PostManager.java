@@ -34,14 +34,21 @@ public class PostManager implements IPostService {
 	private final IModelMapperService modelMapperService;
 
 	@Override
-	@Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+	//@Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
 	public PageResponse<GetAllPostsResponse> getAll(Pageable pageable) {
 		Page<Post> posts = this.postRepository.findAll(pageable);
 		return toPageResponse(posts, GetAllPostsResponse.class);
 	}
+	
+	@Override
+	//@Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+	public PageResponse<GetAllPostsResponse> getAllForUser(Pageable pageable, Long userId) {
+		Page<Post> posts = this.postRepository.findAllByUserId(pageable, userId);
+		return toPageResponse(posts, GetAllPostsResponse.class);
+	}
 
 	@Override
-	@Cacheable(value = "postDetails", key = "#id")
+	//@Cacheable(value = "postDetails", key = "#id")
 	public GetByIdPostResponse getById(Long id) {
 		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
 
@@ -51,14 +58,14 @@ public class PostManager implements IPostService {
 	}
 
 	@Override
-	@Cacheable(value = "userPostTitles", key = "#userId")
-	public List<String> getPostForUser(Long userId) {
+	//@Cacheable(value = "userPostTitles", key = "#userId")
+	public List<String> getPostTitleForUser(Long userId) {
 		return postRepository.findByUserId(userId).stream().map(Post::getTitle).collect(Collectors.toList());
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "allPosts", allEntries = true),
-			@CacheEvict(value = "userPostTitles", key = "#user.id") })
+	//@Caching(evict = { @CacheEvict(value = "allPosts", allEntries = true),
+		//	@CacheEvict(value = "userPostTitles", key = "#user.id") })
 	public Post createPost(CreatePostRequest createPostRequest, User user) {
 		Post post = new Post();
 		post.setUser(user);
@@ -71,8 +78,8 @@ public class PostManager implements IPostService {
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "postDetails", key = "#id"),
-			@CacheEvict(value = "allPosts", allEntries = true) })
+	//@Caching(evict = { @CacheEvict(value = "postDetails", key = "#id"),
+		//	@CacheEvict(value = "allPosts", allEntries = true) })
 	public Post update(Long id, UpdatePostRequest updatePostRequest, User user) {
 		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
 		if (!post.getUser().getId().equals(user.getId())) {
@@ -86,9 +93,9 @@ public class PostManager implements IPostService {
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "postDetails", key = "#id"),
-			@CacheEvict(value = "allPosts", allEntries = true),
-			@CacheEvict(value = "userPostTitles", key = "#user.id") })
+	//@Caching(evict = { @CacheEvict(value = "postDetails", key = "#id"),
+		//	@CacheEvict(value = "allPosts", allEntries = true),
+		//	@CacheEvict(value = "userPostTitles", key = "#user.id") })
 	public Long delete(Long id, User user) {
 		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
 		if (!post.getUser().getId().equals(user.getId())) {

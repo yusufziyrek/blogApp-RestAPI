@@ -29,18 +29,36 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAuthEntryPoint customAuthEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    
+    private static final String API_BASE = "/api/v1";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+           .csrf(csrf -> csrf.disable())
            .authorizeHttpRequests(auth -> auth
-               .requestMatchers("/api/auth/**").permitAll()
-               .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/comments/**", "/api/likes/**").permitAll()
-               .requestMatchers(HttpMethod.POST, "/api/posts/**", "/api/comments/**", "/api/likes/**").authenticated()
-               .requestMatchers(HttpMethod.PUT, "/api/posts/**", "/api/comments/**").authenticated()
-               .requestMatchers(HttpMethod.DELETE, "/api/posts/**", "/api/comments/**", "/api/likes/**").authenticated()
-               .requestMatchers("/api/users/**").authenticated()
-               .requestMatchers("/api/admin/**").hasRole("ADMIN")
+               // Auth işlemleri ve arama işlemleri herkese açık olsun:
+               .requestMatchers(API_BASE + "/auth/**").permitAll()
+               .requestMatchers(HttpMethod.GET,
+                   API_BASE + "/posts/**",
+                   API_BASE + "/comments/**",
+                   API_BASE + "/likes/**",
+                   API_BASE + "/search/**").permitAll()
+               // Diğer GET istekleri için: örneğin, kullanıcı detaylarına erişim için kimlik doğrulaması gerekebilir.
+               .requestMatchers(API_BASE + "/users/**").authenticated()
+               // POST, PUT, DELETE işlemleri kimlik doğrulamalı olsun
+               .requestMatchers(HttpMethod.POST,
+                   API_BASE + "/posts/**",
+                   API_BASE + "/comments/**",
+                   API_BASE + "/likes/**").authenticated()
+               .requestMatchers(HttpMethod.PUT,
+                   API_BASE + "/posts/**",
+                   API_BASE + "/comments/**").authenticated()
+               .requestMatchers(HttpMethod.DELETE,
+                   API_BASE + "/posts/**",
+                   API_BASE + "/comments/**",
+                   API_BASE + "/likes/**").authenticated()
+               .requestMatchers(API_BASE + "/admin/**").hasRole("ADMIN")
                .anyRequest().authenticated()
            )
            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -49,6 +67,7 @@ public class SecurityConfig {
                .accessDeniedHandler(customAccessDeniedHandler)
            )
            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

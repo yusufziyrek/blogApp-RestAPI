@@ -14,6 +14,10 @@ public interface IPostRepository extends JpaRepository<Post, Long> {
 
 	Page<Post> findAll(Pageable pageable);
 
+	Page<Post> findAllByUserId(Pageable pageable, Long userId);
+
 	List<Post> findByUserId(Long userId);
+	
+	Page<Post> findByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(String title, String text, Pageable pageable);
 
 }

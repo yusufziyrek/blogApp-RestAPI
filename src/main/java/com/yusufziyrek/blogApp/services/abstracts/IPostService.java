@@ -15,8 +15,10 @@ import com.yusufziyrek.blogApp.services.responses.PageResponse;
 public interface IPostService {
 
 	PageResponse<GetAllPostsResponse> getAll(Pageable pageable);
-
-	List<String> getPostForUser(Long userId);
+	
+	PageResponse<GetAllPostsResponse> getAllForUser(Pageable pageable, Long userId);
+	
+	List<String> getPostTitleForUser(Long userId);
 
 	GetByIdPostResponse getById(Long id);
 

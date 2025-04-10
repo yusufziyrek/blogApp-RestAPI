@@ -15,6 +15,8 @@ public interface IUserService {
 
 	GetByIdUserResponse getById(Long id);
 
+	GetByIdUserResponse getByUserName(String username);
+
 	User add(RegisterRequest registerUserRequest);
 
 	User update(Long id, UpdateUserRequest updateUserRequest);

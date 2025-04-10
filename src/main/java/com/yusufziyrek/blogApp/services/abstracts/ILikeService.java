@@ -3,6 +3,7 @@ package com.yusufziyrek.blogApp.services.abstracts;
 import java.util.List;
 
 import com.yusufziyrek.blogApp.entities.Like;
+import com.yusufziyrek.blogApp.entities.User;
 import com.yusufziyrek.blogApp.services.requests.CreateLikeForCommentRequest;
 import com.yusufziyrek.blogApp.services.requests.CreateLikeForPostRequest;
 import com.yusufziyrek.blogApp.services.responses.GetAllLikesForCommentResponse;
@@ -17,12 +18,11 @@ public interface ILikeService {
 
 	GetByIdLikeResponse getById(Long id);
 
-	Like addLikeForPost(Long postId, CreateLikeForPostRequest createLikeForPostRequest);
+	Like addLikeForPost(Long postId, CreateLikeForPostRequest createLikeForPostRequest, User user);
 
-	Like addLikeForComment(Long commentId, CreateLikeForCommentRequest createLikeForCommentRequest);
+	Like addLikeForComment(Long commentId, CreateLikeForCommentRequest createLikeForCommentRequest, User user);
 
-	void dislikeForPost(Long id);
+	void dislikeForPost(Long likeId, User user);
 
-	void dislikeForComment(Long id);
-
+	void dislikeForComment(Long likeId, User user);
 }

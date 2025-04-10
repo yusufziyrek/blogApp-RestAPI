@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 public class GetByIdUserResponse {
 
 	private Long id;
-	private String userName;
-	private String firstName;
-	private String lastName;
+	private String username;
+	private String firstname;
+	private String lastname;
 	private String department;
 	private int age;
 	private List<String> titles;

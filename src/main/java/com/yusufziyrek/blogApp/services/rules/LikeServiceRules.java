@@ -15,18 +15,13 @@ public class LikeServiceRules {
 
 	public void checkIfLikeAlreadyExistForPost(Long userId, Long postId) {
 		if (likeRepository.existsByUserIdAndPostId(userId, postId)) {
-			throw new LikeException("The post has already been liked !");
-
+			throw new LikeException("The post has already been liked!");
 		}
-
 	}
 
 	public void checkIfLikeAlreadyExistForComment(Long userId, Long commentId) {
 		if (likeRepository.existsByUserIdAndCommentId(userId, commentId)) {
-			throw new LikeException("The comment has already been liked !");
-
+			throw new LikeException("The comment has already been liked!");
 		}
-
 	}
-
 }
