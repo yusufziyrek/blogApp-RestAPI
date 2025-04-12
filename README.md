@@ -59,14 +59,18 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
   Registers a new user and triggers email verification.
 - **`POST /api/v1/auth/login`**:  
   Authenticates a user and returns a JWT token.
-- **`GET /api/v1/auth/verify-email?token={token}`**:  
+- **`GET /api/v1/auth/verify?token={token}`**:  
   Verifies the user’s email using the provided token.
+- **`POST /api/v1/auth/refresh`**:  
+  Refreshes the JWT token.
 
 #### **User Management:**
 - **`GET /api/v1/users`**:  
   Lists all users.
+- **`GET /api/v1/users/by-username/{username}`**:  
+  Returns information for a specific user by username.
 - **`GET /api/v1/users/{id}`**:  
-  Returns information for a specific user.
+  Returns information for a specific user by ID.
 - **`PUT /api/v1/users/{id}`**:  
   Updates user details.
 - **`DELETE /api/v1/users/{id}`**:  
@@ -75,6 +79,8 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 #### **Post Management:**
 - **`GET /api/v1/posts`**:  
   Lists all blog posts.
+- **`GET /api/v1/posts/me`**:  
+  Returns blog posts for the authenticated user.
 - **`GET /api/v1/posts/{id}`**:  
   Returns details for a specific post.
 - **`POST /api/v1/posts`**:  
@@ -87,8 +93,14 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 #### **Comment Management:**
 - **`GET /api/v1/comments/post/{postId}`**:  
   Returns comments for a specific post.
+- **`GET /api/v1/comments/user`**:  
+  Returns comments for the authenticated user.
+- **`GET /api/v1/comments/{id}`**:  
+  Returns details for a specific comment.
 - **`POST /api/v1/comments/post/{postId}`**:  
   Adds a new comment to a post (Requires authentication).
+- **`PUT /api/v1/comments/{id}`**:  
+  Updates a comment (Requires authentication).
 - **`DELETE /api/v1/comments/{id}`**:  
   Deletes a comment (Requires authentication).
 
@@ -97,12 +109,20 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
   Returns likes for a specific post.
 - **`GET /api/v1/likes/comment/{commentId}`**:  
   Returns likes for a specific comment.
+- **`GET /api/v1/likes/{id}`**:  
+  Returns details for a specific like.
 - **`POST /api/v1/likes/post/{postId}`**:  
   Likes a post (Requires authentication).
 - **`POST /api/v1/likes/comment/{commentId}`**:  
   Likes a comment (Requires authentication).
-- **`DELETE /api/v1/likes/{likeId}`**:  
-  Deletes a like (Requires authentication).
+- **`DELETE /api/v1/likes/post/{likeId}`**:  
+  Deletes a like from a post (Requires authentication).
+- **`DELETE /api/v1/likes/comment/{likeId}`**:  
+  Deletes a like from a comment (Requires authentication).
+
+#### **Search Functionality:**
+- **`GET /api/v1/search`**:  
+  Searches posts, users, or all fields based on a query and an optional type parameter (default is "all").
 
 ---
 
@@ -118,9 +138,9 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 - **Token Expiration Handling:**  
   Validates token expiration to ensure secure session management.
 - **Email Verification Flow:**  
-  1. **User Registration:** User registers via `POST /auth/register`.  
+  1. **User Registration:** User registers via `POST /api/v1/auth/register`.  
   2. **Verification Link:** An email is sent with a verification link.  
-  3. **Account Activation:** User activates their account by visiting `GET /auth/verify-email?token=<TOKEN>`.  
+  3. **Account Activation:** User activates their account by visiting `GET /api/v1/auth/verify?token=<TOKEN>`.  
   4. **Authentication:** Once verified, the user can log in and receive a JWT token.
 
 ---
@@ -169,6 +189,7 @@ To improve performance and reduce database load, BlogApp-RestAPI integrates **Ca
    spring.mail.properties.mail.smtp.auth=true
    spring.mail.properties.mail.smtp.starttls.enable=true
    spring.mail.properties.mail.smtp.starttls.required=true
+   ```
 5. **Test Endpoints:**  
    - **Authentication:**  
      ```bash
@@ -177,7 +198,7 @@ To improve performance and reduce database load, BlogApp-RestAPI integrates **Ca
           -d '{"username":"user1","password":"password"}'
      ```
    - **Email Verification:**  
-     Check your inbox for a verification link and open it in a browser (e.g., `GET /auth/verify-email?token=<TOKEN>`).
+     Check your inbox for a verification link and open it in a browser (e.g., `GET /auth/verify?token=<TOKEN>`).
 6. **Database Configuration:**  
    Update the relevant properties in `application.properties` (or `application.yml`) to point to your preferred database (MySQL, PostgreSQL, etc.).
 
@@ -196,15 +217,15 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
 # **Preview**
 - **Auth operations**
   
-  ![image](https://github.com/user-attachments/assets/8381ac64-f820-40a5-923a-6346b743b523)
-  ![image](https://github.com/user-attachments/assets/162a6931-77cf-4f64-b37d-e4bf1788bfe5)
-  ![image](https://github.com/user-attachments/assets/a039a244-f15a-4827-9e99-722903d041aa)
-  ![image](https://github.com/user-attachments/assets/f38bff4e-10f3-4e74-8a4a-fb5358042a7c)
+  ![image](https://github.com/user-attachments/assets/8381ac64-f820-40a5-923a-6346b743b523)  
+  ![image](https://github.com/user-attachments/assets/162a6931-77cf-4f64-b37d-e4bf1788bfe5)  
+  ![image](https://github.com/user-attachments/assets/a039a244-f15a-4827-9e99-722903d041aa)  
+  ![image](https://github.com/user-attachments/assets/f38bff4e-10f3-4e74-8a4a-fb5358042a7c)  
   ![image](https://github.com/user-attachments/assets/7904d994-5cd2-4153-a8b7-087cb172c124)
 
 - **Post operations**
 
-  ![image](https://github.com/user-attachments/assets/89504de4-3dec-486f-bf37-ad5426320a44)
+  ![image](https://github.com/user-attachments/assets/89504de4-3dec-486f-bf37-ad5426320a44)  
   ![image](https://github.com/user-attachments/assets/5f5912f1-cac1-41d5-9232-a212b15a5eee)
 
 - **Comment operations**
@@ -213,16 +234,16 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
 
 - **Like operations**
 
-  ![image](https://github.com/user-attachments/assets/17eb5e5d-3980-4016-8c4d-a37f9153c1a1)
+  ![image](https://github.com/user-attachments/assets/17eb5e5d-3980-4016-8c4d-a37f9153c1a1)  
   ![image](https://github.com/user-attachments/assets/a942590b-80ae-498e-8f3e-ca450f268e40)
 
 ---
 
 ### **Exceptions**
 
-  ![image](https://github.com/user-attachments/assets/4945327f-d2e4-4de4-acfd-c375c4eb5389)
-  ![image](https://github.com/user-attachments/assets/4247b747-a1e3-4ce9-a27c-29c7b5ab4fe4)
-  ![image](https://github.com/user-attachments/assets/ebc8f309-fe61-48b8-a8f5-82c652b20a60)
+  ![image](https://github.com/user-attachments/assets/4945327f-d2e4-4de4-acfd-c375c4eb5389)  
+  ![image](https://github.com/user-attachments/assets/4247b747-a1e3-4ce9-a27c-29c7b5ab4fe4)  
+  ![image](https://github.com/user-attachments/assets/ebc8f309-fe61-48b8-a8f5-82c652b20a60)  
   ![image](https://github.com/user-attachments/assets/384e82b4-c77a-470b-9b35-6b227b0f89ca)
 
----
+--- 
