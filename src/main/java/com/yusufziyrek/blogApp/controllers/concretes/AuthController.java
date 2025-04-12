@@ -14,6 +14,7 @@ import com.yusufziyrek.blogApp.services.abstracts.IAuthService;
 import com.yusufziyrek.blogApp.services.concretes.RefreshTokenService;
 import com.yusufziyrek.blogApp.services.requests.LoginRequest;
 import com.yusufziyrek.blogApp.services.requests.RegisterRequest;
+import com.yusufziyrek.blogApp.services.responses.ApiResponse;
 import com.yusufziyrek.blogApp.services.responses.AuthResponse;
 import com.yusufziyrek.blogApp.utilites.exceptions.AuthException;
 
@@ -30,25 +31,25 @@ public class AuthController implements IAuthController {
 	private final JwtUtil jwtUtil;
 
 	@Override
-	public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
+	public ResponseEntity<ApiResponse<String>> register(@RequestBody @Valid RegisterRequest request) {
 		String response = authService.register(request);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(new ApiResponse<>(true, "User registered successfully", response));
 	}
 
 	@Override
-	public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
+	public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody @Valid LoginRequest request) {
 		AuthResponse response = authService.login(request);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Login successful", response));
 	}
 
 	@Override
-	public ResponseEntity<String> verifyAccount(@RequestParam("token") String token) {
+	public ResponseEntity<ApiResponse<String>> verifyAccount(@RequestParam("token") String token) {
 		String result = authService.verifyAccount(token);
-		return ResponseEntity.ok(result);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Account verification successful", result));
 	}
 
 	@Override
-	public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+	public ResponseEntity<ApiResponse<Map<String, String>>> refreshToken(@RequestBody Map<String, String> request) {
 		String requestRefreshToken = request.get("refreshToken");
 		var optionalToken = refreshTokenService.findByToken(requestRefreshToken);
 		if (optionalToken.isEmpty()) {
@@ -57,6 +58,7 @@ public class AuthController implements IAuthController {
 		var refreshToken = refreshTokenService.verifyExpiration(optionalToken.get());
 		String newAccessToken = jwtUtil.generateToken(refreshToken.getUser().getEmail(),
 				refreshToken.getUser().getId());
-		return ResponseEntity.ok(Map.of("accessToken", newAccessToken, "refreshToken", refreshToken.getToken()));
+		Map<String, String> data = Map.of("accessToken", newAccessToken, "refreshToken", refreshToken.getToken());
+		return ResponseEntity.ok(new ApiResponse<>(true, "Token refreshed successfully", data));
 	}
 }
