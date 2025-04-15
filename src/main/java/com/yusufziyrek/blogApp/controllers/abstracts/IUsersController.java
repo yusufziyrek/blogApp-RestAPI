@@ -2,6 +2,7 @@ package com.yusufziyrek.blogApp.controllers.abstracts;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,9 @@ public interface IUsersController {
 
 	@GetMapping
 	ResponseEntity<ApiResponse<PageResponse<GetAllUsersResponse>>> getAll(Pageable pageable);
+
+	@GetMapping("/me")
+	ResponseEntity<ApiResponse<GetByIdUserResponse>> getProfileByUser(@AuthenticationPrincipal User user);
 
 	@GetMapping("/by-username/{username}")
 	ResponseEntity<ApiResponse<GetByIdUserResponse>> getByUserName(@PathVariable String username);

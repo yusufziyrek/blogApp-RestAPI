@@ -2,6 +2,7 @@ package com.yusufziyrek.blogApp.controllers.concretes;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,12 @@ public class UsersController implements IUsersController {
 	public ResponseEntity<ApiResponse<PageResponse<GetAllUsersResponse>>> getAll(Pageable pageable) {
 		PageResponse<GetAllUsersResponse> users = userService.getAll(pageable);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Users retrieved successfully", users));
+	}
+
+	@Override
+	public ResponseEntity<ApiResponse<GetByIdUserResponse>> getProfileByUser(@AuthenticationPrincipal User user) {
+		GetByIdUserResponse response= userService.getById(user.getId());
+		return ResponseEntity.ok(new ApiResponse<>(true, "User retrieved successfully", response));
 	}
 
 	@Override
