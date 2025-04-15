@@ -67,6 +67,8 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 #### **User Management:**
 - **`GET /api/v1/users`**:  
   Lists all users.
+- **`GET /api/v1/users/me`**:  
+  Returns the user profile for the authenticated user.
 - **`GET /api/v1/users/by-username/{username}`**:  
   Returns information for a specific user by username.
 - **`GET /api/v1/users/{id}`**:  
