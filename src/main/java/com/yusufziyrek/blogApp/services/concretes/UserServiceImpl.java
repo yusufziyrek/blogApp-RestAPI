@@ -35,15 +35,14 @@ public class UserServiceImpl implements IUserService {
 	private final UserServiceRules serviceRules;
 
 	@Override
-	// @Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' +
-	// #pageable.pageSize")
+	@Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
 	public PageResponse<GetAllUsersResponse> getAll(Pageable pageable) {
-		Page<User> products = this.userRepository.findAll(pageable);
-		return toPageResponse(products, GetAllUsersResponse.class);
+		Page<User> users = this.userRepository.findAll(pageable);
+		return toPageResponse(users, GetAllUsersResponse.class);
 	}
 
 	@Override
-	// @Cacheable(value = "userDetails", key = "#id")
+	@Cacheable(value = "userDetails", key = "#id")
 	public GetByIdUserResponse getById(Long id) {
 		User user = this.userRepository.findById(id).orElseThrow(() -> new UserException("User id not exist !"));
 
@@ -55,30 +54,23 @@ public class UserServiceImpl implements IUserService {
 
 	public GetByIdUserResponse getByUserName(String username) {
 		User user = this.userRepository.findByUsername(username)
-				.orElseThrow(() -> new UserException("Username doesnt exist"));
-
-		GetByIdUserResponse response = this.modelMapperService.forResponse().map(user, GetByIdUserResponse.class);
-
-		return response;
+				.orElseThrow(() -> new UserException("Username doesn't exist"));
+		return this.modelMapperService.forResponse().map(user, GetByIdUserResponse.class);
 	}
 
 	@Override
-	// @CacheEvict(value = {"userDetails", "allUsers"}, allEntries = true)
+	@CacheEvict(value = { "userDetails", "allUsers" }, allEntries = true)
 	public User add(RegisterRequest registerUserRequest) {
 		this.serviceRules.checkIfUserNameExists(registerUserRequest.getUsername());
-
 		User user = this.modelMapperService.forRequest().map(registerUserRequest, User.class);
 		return this.userRepository.save(user);
 	}
 
 	@Override
-//	@Caching(evict = {
-//		@CacheEvict(value = "userDetails", key = "#id"),
-//		@CacheEvict(value = "allUsers", allEntries = true)
-//	})
+	@Caching(evict = { @CacheEvict(value = "userDetails", key = "#id"),
+			@CacheEvict(value = "allUsers", allEntries = true) })
 	public User update(Long id, UpdateUserRequest updateUserRequest) {
 		User user = this.userRepository.findById(id).orElseThrow(() -> new UserException("User id not exist !"));
-
 		user.setUsername(updateUserRequest.getUsername());
 		user.setFirstname(updateUserRequest.getFirstname());
 		user.setLastname(updateUserRequest.getLastname());
@@ -90,10 +82,8 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-//	@Caching(evict = {
-//		@CacheEvict(value = "userDetails", key = "#id"),
-//		@CacheEvict(value = "allUsers", allEntries = true)
-//	})
+	@Caching(evict = { @CacheEvict(value = "userDetails", key = "#id"),
+			@CacheEvict(value = "allUsers", allEntries = true) })
 	public void delete(Long id) {
 		this.userRepository.deleteById(id);
 	}

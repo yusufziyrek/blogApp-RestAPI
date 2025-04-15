@@ -34,7 +34,7 @@ public class CommentServiceImpl implements ICommentService {
 	private final IModelMapperService modelMapperService;
 
 	@Override
-	//@Cacheable(value = "commentsForPost", key = "#postId")
+	@Cacheable(value = "commentsForPost", key = "#postId")
 	public List<GetAllCommentsForPostResponse> getAllForPost(Long postId) {
 		List<Comment> comments = this.commentRepository.findByPostId(postId);
 		return comments.stream().map(comment -> {
@@ -47,7 +47,7 @@ public class CommentServiceImpl implements ICommentService {
 	}
 
 	@Override
-	//@Cacheable(value = "commentsForUser", key = "#userId")
+	@Cacheable(value = "commentsForUser", key = "#userId")
 	public List<GetAllCommentsForUserResponse> getAllForUser(Long userId) {
 		List<Comment> comments = this.commentRepository.findByUserId(userId);
 		return comments.stream()
@@ -56,7 +56,7 @@ public class CommentServiceImpl implements ICommentService {
 	}
 
 	@Override
-	//@Cacheable(value = "commentDetails", key = "#id")
+	@Cacheable(value = "commentDetails", key = "#id")
 	public GetByIdCommentResponse getById(Long id) {
 		Comment comment = this.commentRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Comment not found!"));
@@ -64,8 +64,8 @@ public class CommentServiceImpl implements ICommentService {
 	}
 
 	@Override
-//	@Caching(evict = { @CacheEvict(value = "commentsForPost", key = "#postId"),
-//			@CacheEvict(value = "commentsForUser", key = "#user.id") })
+	@Caching(evict = { @CacheEvict(value = "commentsForPost", key = "#postId"),
+			@CacheEvict(value = "commentsForUser", key = "#user.id") })
 	public Comment add(Long postId, CreateCommentRequest createCommentRequest, User user) {
 		Comment comment = new Comment();
 		comment.setText(createCommentRequest.getText());
@@ -82,9 +82,9 @@ public class CommentServiceImpl implements ICommentService {
 	}
 
 	@Override
-//	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
-//			@CacheEvict(value = "commentsForPost", allEntries = true),
-//			@CacheEvict(value = "commentsForUser", allEntries = true) })
+	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
+			@CacheEvict(value = "commentsForPost", allEntries = true),
+			@CacheEvict(value = "commentsForUser", allEntries = true) })
 	public Comment update(Long id, UpdateCommentRequest updateCommentRequest, User user) {
 		Comment comment = this.commentRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Comment not found!"));
@@ -96,9 +96,9 @@ public class CommentServiceImpl implements ICommentService {
 	}
 
 	@Override
-//	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
-//			@CacheEvict(value = "commentsForPost", allEntries = true),
-//			@CacheEvict(value = "commentsForUser", allEntries = true) })
+	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
+			@CacheEvict(value = "commentsForPost", allEntries = true),
+			@CacheEvict(value = "commentsForUser", allEntries = true) })
 	public void delete(Long id, User user) {
 		Comment comment = this.commentRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Comment not found!"));

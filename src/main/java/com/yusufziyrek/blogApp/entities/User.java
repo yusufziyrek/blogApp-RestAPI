@@ -18,56 +18,62 @@ import java.util.List;
 @AllArgsConstructor
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "first_name")
-    private String firstname;
+	@Column(name = "first_name")
+	private String firstname;
 
-    @Column(name = "last_name")
-    private String lastname;
+	@Column(name = "last_name")
+	private String lastname;
 
-    @Column(name = "user_name", unique = true)
-    private String username;
+	@Column(name = "user_name", unique = true)
+	private String username;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+	@Column(unique = true, nullable = false)
+	private String email;
 
-    private String password;
-    
-    private String department;
-    
-    private int age;
+	private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Post> posts;
+	private String department;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Comment> comments;
+	private int age;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Like> likes;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Post> posts;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Comment> comments;
 
-    private boolean enabled = false;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Like> likes;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-    }
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
-    @Override
-    public boolean isAccountNonExpired() { return true; }
+	private boolean enabled = false;
 
-    @Override
-    public boolean isAccountNonLocked() { return true; }
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+	}
 
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
 }
