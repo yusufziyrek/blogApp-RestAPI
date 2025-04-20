@@ -6,9 +6,10 @@ import java.util.stream.Collectors;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.yusufziyrek.blogApp.content.domain.Comment;
-import com.yusufziyrek.blogApp.content.domain.Like;
-import com.yusufziyrek.blogApp.content.domain.Post;
+import com.yusufziyrek.blogApp.content.domain.models.Comment;
+import com.yusufziyrek.blogApp.content.domain.models.Like;
+import com.yusufziyrek.blogApp.content.domain.models.Post;
+import com.yusufziyrek.blogApp.content.domain.rules.LikeServiceRules;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateLikeForCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateLikeForPostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllLikesForCommentResponse;
@@ -18,8 +19,7 @@ import com.yusufziyrek.blogApp.content.repo.ICommentRepository;
 import com.yusufziyrek.blogApp.content.repo.ILikeRepository;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.ILikeService;
-import com.yusufziyrek.blogApp.identity.domain.User;
-import com.yusufziyrek.blogApp.services.rules.LikeServiceRules;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.exception.LikeException;
 import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
 

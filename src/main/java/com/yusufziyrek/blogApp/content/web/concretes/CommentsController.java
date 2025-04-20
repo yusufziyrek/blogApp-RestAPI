@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yusufziyrek.blogApp.content.domain.Comment;
+import com.yusufziyrek.blogApp.content.domain.models.Comment;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.UpdateCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllCommentsForPostResponse;
@@ -18,7 +18,7 @@ import com.yusufziyrek.blogApp.content.dto.responses.GetAllCommentsForUserRespon
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdCommentResponse;
 import com.yusufziyrek.blogApp.content.service.abstracts.ICommentService;
 import com.yusufziyrek.blogApp.content.web.abstracts.ICommentsController;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
 
 import jakarta.validation.Valid;

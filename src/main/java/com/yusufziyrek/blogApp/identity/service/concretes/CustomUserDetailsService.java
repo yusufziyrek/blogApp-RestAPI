@@ -1,6 +1,6 @@
 package com.yusufziyrek.blogApp.identity.service.concretes;
 
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
 
 import lombok.RequiredArgsConstructor;

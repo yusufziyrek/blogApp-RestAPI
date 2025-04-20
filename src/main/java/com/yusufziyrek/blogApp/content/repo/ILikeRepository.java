@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.yusufziyrek.blogApp.content.domain.Like;
+import com.yusufziyrek.blogApp.content.domain.models.Like;
 
 @Repository
 public interface ILikeRepository extends JpaRepository<Like, Long> {

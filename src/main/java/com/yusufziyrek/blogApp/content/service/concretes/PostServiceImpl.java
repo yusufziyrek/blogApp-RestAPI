@@ -12,14 +12,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.yusufziyrek.blogApp.content.domain.Post;
+import com.yusufziyrek.blogApp.content.domain.models.Post;
 import com.yusufziyrek.blogApp.content.dto.requests.CreatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.UpdatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllPostsResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdPostResponse;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.IPostService;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 import com.yusufziyrek.blogApp.shared.exception.PostException;
 import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;

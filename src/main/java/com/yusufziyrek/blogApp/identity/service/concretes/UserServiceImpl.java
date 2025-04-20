@@ -11,14 +11,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.yusufziyrek.blogApp.content.service.abstracts.IPostService;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
+import com.yusufziyrek.blogApp.identity.domain.rules.UserServiceRules;
 import com.yusufziyrek.blogApp.identity.dto.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.identity.dto.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.identity.dto.responses.GetAllUsersResponse;
 import com.yusufziyrek.blogApp.identity.dto.responses.GetByIdUserResponse;
 import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
 import com.yusufziyrek.blogApp.identity.service.abstracts.IUserService;
-import com.yusufziyrek.blogApp.services.rules.UserServiceRules;
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 import com.yusufziyrek.blogApp.shared.exception.UserException;
 import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;

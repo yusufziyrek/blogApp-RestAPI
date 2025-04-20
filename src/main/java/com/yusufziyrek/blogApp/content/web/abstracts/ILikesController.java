@@ -5,13 +5,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.yusufziyrek.blogApp.content.domain.Like;
+import com.yusufziyrek.blogApp.content.domain.models.Like;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateLikeForCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateLikeForPostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllLikesForCommentResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllLikesForPostResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdLikeResponse;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
 
 import jakarta.validation.Valid;

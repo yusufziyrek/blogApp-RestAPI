@@ -2,7 +2,7 @@ package com.yusufziyrek.blogApp.identity.service.abstracts;
 
 import org.springframework.data.domain.Pageable;
 
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.identity.dto.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.identity.dto.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.identity.dto.responses.GetAllUsersResponse;

@@ -1,7 +1,7 @@
 package com.yusufziyrek.blogApp.identity.service.concretes;
 
-import com.yusufziyrek.blogApp.identity.domain.RefreshToken;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.RefreshToken;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.identity.repo.IRefreshTokenRepository;
 import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
 import com.yusufziyrek.blogApp.shared.exception.AuthException;

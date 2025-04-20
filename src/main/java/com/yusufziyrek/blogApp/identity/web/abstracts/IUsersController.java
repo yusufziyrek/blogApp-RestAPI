@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.identity.dto.requests.UpdateUserRequest;
 import com.yusufziyrek.blogApp.identity.dto.responses.GetAllUsersResponse;
 import com.yusufziyrek.blogApp.identity.dto.responses.GetByIdUserResponse;

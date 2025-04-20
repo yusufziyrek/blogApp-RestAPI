@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yusufziyrek.blogApp.content.domain.Post;
+import com.yusufziyrek.blogApp.content.domain.models.Post;
 import com.yusufziyrek.blogApp.content.dto.requests.CreatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.UpdatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllPostsResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdPostResponse;
 import com.yusufziyrek.blogApp.content.service.abstracts.IPostService;
 import com.yusufziyrek.blogApp.content.web.abstracts.IPostsController;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 

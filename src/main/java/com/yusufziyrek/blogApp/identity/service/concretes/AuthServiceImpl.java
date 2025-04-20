@@ -8,10 +8,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.yusufziyrek.blogApp.identity.domain.RefreshToken;
-import com.yusufziyrek.blogApp.identity.domain.Role;
-import com.yusufziyrek.blogApp.identity.domain.User;
-import com.yusufziyrek.blogApp.identity.domain.VerificationToken;
+import com.yusufziyrek.blogApp.identity.domain.models.RefreshToken;
+import com.yusufziyrek.blogApp.identity.domain.models.Role;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
+import com.yusufziyrek.blogApp.identity.domain.models.VerificationToken;
 import com.yusufziyrek.blogApp.identity.dto.requests.LoginRequest;
 import com.yusufziyrek.blogApp.identity.dto.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.identity.dto.responses.AuthResponse;

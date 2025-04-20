@@ -1,4 +1,4 @@
-package com.yusufziyrek.blogApp.services.rules;
+package com.yusufziyrek.blogApp.identity.domain.rules;
 
 import org.springframework.stereotype.Service;
 

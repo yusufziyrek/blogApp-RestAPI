@@ -2,13 +2,13 @@ package com.yusufziyrek.blogApp.content.service.abstracts;
 
 import java.util.List;
 
-import com.yusufziyrek.blogApp.content.domain.Like;
+import com.yusufziyrek.blogApp.content.domain.models.Like;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateLikeForCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateLikeForPostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllLikesForCommentResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllLikesForPostResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdLikeResponse;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 
 public interface ILikeService {
 

@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.yusufziyrek.blogApp.identity.domain.VerificationToken;
+import com.yusufziyrek.blogApp.identity.domain.models.VerificationToken;
 
 @Repository
 public interface IVerificationTokenRepository extends JpaRepository<VerificationToken, Long>{

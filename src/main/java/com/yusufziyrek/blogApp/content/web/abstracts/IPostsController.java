@@ -6,12 +6,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.yusufziyrek.blogApp.content.domain.Post;
+import com.yusufziyrek.blogApp.content.domain.models.Post;
 import com.yusufziyrek.blogApp.content.dto.requests.CreatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.UpdatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllPostsResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdPostResponse;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 

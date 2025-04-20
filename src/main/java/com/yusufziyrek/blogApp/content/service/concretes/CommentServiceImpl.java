@@ -10,8 +10,8 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.yusufziyrek.blogApp.content.domain.Comment;
-import com.yusufziyrek.blogApp.content.domain.Post;
+import com.yusufziyrek.blogApp.content.domain.models.Comment;
+import com.yusufziyrek.blogApp.content.domain.models.Post;
 import com.yusufziyrek.blogApp.content.dto.requests.CreateCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.UpdateCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllCommentsForPostResponse;
@@ -20,7 +20,7 @@ import com.yusufziyrek.blogApp.content.dto.responses.GetByIdCommentResponse;
 import com.yusufziyrek.blogApp.content.repo.ICommentRepository;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.ICommentService;
-import com.yusufziyrek.blogApp.identity.domain.User;
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
 
 import lombok.RequiredArgsConstructor;
