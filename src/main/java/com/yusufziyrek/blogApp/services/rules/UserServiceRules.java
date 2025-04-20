@@ -2,8 +2,8 @@ package com.yusufziyrek.blogApp.services.rules;
 
 import org.springframework.stereotype.Service;
 
-import com.yusufziyrek.blogApp.repos.IUserRepository;
-import com.yusufziyrek.blogApp.utilites.exceptions.UserException;
+import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
 
 import lombok.AllArgsConstructor;
 

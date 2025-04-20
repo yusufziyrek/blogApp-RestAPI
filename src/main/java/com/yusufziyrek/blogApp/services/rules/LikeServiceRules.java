@@ -2,8 +2,8 @@ package com.yusufziyrek.blogApp.services.rules;
 
 import org.springframework.stereotype.Service;
 
-import com.yusufziyrek.blogApp.repos.ILikeRepository;
-import com.yusufziyrek.blogApp.utilites.exceptions.LikeException;
+import com.yusufziyrek.blogApp.content.repo.ILikeRepository;
+import com.yusufziyrek.blogApp.shared.exception.LikeException;
 
 import lombok.AllArgsConstructor;
 
