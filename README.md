@@ -221,7 +221,6 @@ To improve performance and reduce database load, BlogApp-RestAPI integrates **Ca
 For more information, check the [GitHub repository](https://github.com/yusufziyrek/blogApp-RestAPI).
 
 ---
-
 # **Preview**
 - **Auth operations**
   
@@ -238,7 +237,7 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
 
 - **Comment operations**
 
-  ![image](https://github.com/user-attachments/assets/327e81c4-d692-498e-4ab-fa1245c6350a)
+  ![image](https://github.com/user-attachments/assets/327e81c4-d692-498f-a4ab-fa1245c6350a)
 
 - **Like operations**
 
@@ -250,6 +249,9 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
 ### **Exceptions**
 
   ![image](https://github.com/user-attachments/assets/4945327f-d2e4-4de4-acfd-c375c4eb5389)  
-  ![image](https://github.com/user-attachments/assets/4247b747-a1e3-4ce9-a27c29c7b5ab4fe5)  
-  ![image](https://github.com/user-attachments/assets/ebc8f309-fe61-48b8-a4f5-82c652b20a60)  
+  ![image](https://github.com/user-attachments/assets/4247b747-a1e3-4ce9-a27c-29c7b5ab4fe4)  
+  ![image](https://github.com/user-attachments/assets/ebc8f309-fe61-48b8-a8f5-82c652b20a60)  
   ![image](https://github.com/user-attachments/assets/384e82b4-c77a-470b-9b35-6b227b0f89ca)
+
+---
+
