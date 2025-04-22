@@ -1,6 +1,6 @@
 package com.yusufziyrek.blogApp.content.service.concretes;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +72,7 @@ public class CommentServiceImpl implements ICommentService {
 		comment.setUser(user);
 		comment.setPost(
 				this.postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found!")));
-		comment.setCreatedDate(new Date());
+		comment.setCreatedDate(LocalDateTime.now());
 
 		Post post = comment.getPost();
 		post.incrementCommentCount();

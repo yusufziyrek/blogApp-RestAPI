@@ -1,6 +1,6 @@
 package com.yusufziyrek.blogApp.content.dto.responses;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +16,6 @@ public class GetAllPostsResponse {
 	private String title;
 	private int commentCount;
 	private int likeCount;
-	private Date createdDate;
+	private LocalDateTime createdDate;
 
 }

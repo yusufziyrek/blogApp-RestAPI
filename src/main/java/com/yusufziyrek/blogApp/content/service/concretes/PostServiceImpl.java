@@ -1,6 +1,6 @@
 package com.yusufziyrek.blogApp.content.service.concretes;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,8 +70,8 @@ public class PostServiceImpl implements IPostService {
 		post.setUser(user);
 		post.setTitle(createPostRequest.getTitle());
 		post.setText(createPostRequest.getText());
-		post.setCreatedDate(new Date());
-		post.setUpdatedDate(new Date());
+		post.setCreatedDate(LocalDateTime.now());
+		post.setUpdatedDate(LocalDateTime.now());
 
 		return this.postRepository.save(post);
 	}
@@ -86,7 +86,7 @@ public class PostServiceImpl implements IPostService {
 		}
 		post.setTitle(updatePostRequest.getTitle());
 		post.setText(updatePostRequest.getText());
-		post.setUpdatedDate(new Date());
+		post.setUpdatedDate(LocalDateTime.now());
 
 		return this.postRepository.save(post);
 	}
