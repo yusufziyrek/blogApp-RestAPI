@@ -19,6 +19,7 @@ import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
 import com.yusufziyrek.blogApp.identity.repo.IVerificationTokenRepository;
 import com.yusufziyrek.blogApp.identity.service.abstracts.IAuthService;
 import com.yusufziyrek.blogApp.shared.exception.AuthException;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
 import com.yusufziyrek.blogApp.shared.security.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class AuthServiceImpl implements IAuthService {
     public String register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())
                 || userRepository.existsByUsername(request.getUsername())) {
-            throw new AuthException("Email or Username already in use!");
+            throw new UserException("Email or Username already in use!");
         }
         User user = new User();
         user.setEmail(request.getEmail());
@@ -63,7 +64,7 @@ public class AuthServiceImpl implements IAuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmailOrUsername(request.getUsernameOrEmail(), request.getUsernameOrEmail())
-                .orElseThrow(() -> new AuthException("User not found!"));
+                .orElseThrow(() -> new UserException("User not found!"));
         if (!user.isEnabled()) {
             throw new AuthException("Your account is not verified yet. Please check your email for the activation link.");
         }

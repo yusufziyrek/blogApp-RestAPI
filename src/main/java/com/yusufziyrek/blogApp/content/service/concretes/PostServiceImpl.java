@@ -1,15 +1,18 @@
 package com.yusufziyrek.blogApp.content.service.concretes;
 
-import java.time.ZoneId;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.cache.annotation.*;
-import org.springframework.data.domain.*;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yusufziyrek.blogApp.content.domain.models.Post;
 import com.yusufziyrek.blogApp.content.dto.requests.CreatePostRequest;
@@ -26,12 +29,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(keyGenerator = "cacheKeyGenerator")
 public class PostServiceImpl implements IPostService {
 
     private final IPostRepository postRepository;
 
     @Override
-    @Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+    @Cacheable(value = "allPosts")
     public PageResponse<GetAllPostsResponse> getAll(Pageable pageable) {
         Page<Post> page = postRepository.findAll(pageable);
         List<GetAllPostsResponse> items = page.getContent().stream()
@@ -55,7 +59,7 @@ public class PostServiceImpl implements IPostService {
     }
 
     @Override
-    @Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #userId")
+    @Cacheable(value = "userPosts")
     public PageResponse<GetAllPostsResponse> getAllForUser(Pageable pageable, Long userId) {
         Page<Post> page = postRepository.findAllByUserId(pageable, userId);
         List<GetAllPostsResponse> items = page.getContent().stream()
@@ -84,12 +88,6 @@ public class PostServiceImpl implements IPostService {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new PostException("Post id not exist !"));
 
-        Date createdDate = Date.from(
-            post.getCreatedDate()
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-        );
-
         return GetByIdPostResponse.builder()
             .id(post.getId())
             .authorUser(post.getUser().getUsername())
@@ -97,7 +95,7 @@ public class PostServiceImpl implements IPostService {
             .text(post.getText())
             .commentCount(post.getCommentCount())
             .likeCount(post.getLikeCount())
-            .createdDate(createdDate)
+            .createdDate(post.getCreatedDate())
             .build();
     }
 
@@ -111,8 +109,10 @@ public class PostServiceImpl implements IPostService {
     }
 
     @Override
+    @Transactional
     @Caching(evict = {
         @CacheEvict(value = "allPosts", allEntries = true),
+        @CacheEvict(value = "userPosts", allEntries = true),
         @CacheEvict(value = "userPostTitles", key = "#user.id")
     })
     public Post createPost(CreatePostRequest req, User user) {
@@ -128,9 +128,12 @@ public class PostServiceImpl implements IPostService {
     }
 
     @Override
+    @Transactional
     @Caching(evict = {
         @CacheEvict(value = "postDetails", key = "#id"),
-        @CacheEvict(value = "allPosts", allEntries = true)
+        @CacheEvict(value = "allPosts", allEntries = true),
+        @CacheEvict(value = "userPosts", allEntries = true),
+        @CacheEvict(value = "userPostTitles", key = "#user.id")
     })
     public Post update(Long id, UpdatePostRequest req, User user) {
         Post post = postRepository.findById(id)
@@ -148,21 +151,21 @@ public class PostServiceImpl implements IPostService {
     }
 
     @Override
+    @Transactional
     @Caching(evict = {
         @CacheEvict(value = "postDetails", key = "#id"),
         @CacheEvict(value = "allPosts", allEntries = true),
+        @CacheEvict(value = "userPosts", allEntries = true),
         @CacheEvict(value = "userPostTitles", key = "#user.id")
     })
-    public Long delete(Long id, User user) {
-    	 Post post = postRepository.findById(id)
+    public void delete(Long id, User user) {
+        Post post = postRepository.findById(id)
             .orElseThrow(() -> new PostException("Post id not exist !"));
-    	
-    	 if (!post.getUser().getId().equals(user.getId())) {
-             throw new AccessDeniedException("You are not allowed to delete this post.");
-         }
 
-        Long uid = post.getUser().getId();
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You are not allowed to delete this post.");
+        }
+
         postRepository.deleteById(id);
-        return uid;
     }
 }

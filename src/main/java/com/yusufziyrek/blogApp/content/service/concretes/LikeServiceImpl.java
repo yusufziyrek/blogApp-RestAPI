@@ -20,6 +20,7 @@ import com.yusufziyrek.blogApp.content.repo.ILikeRepository;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.ILikeService;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
+import com.yusufziyrek.blogApp.shared.exception.CommentException;
 import com.yusufziyrek.blogApp.shared.exception.LikeException;
 import com.yusufziyrek.blogApp.shared.exception.PostException;
 
@@ -92,7 +93,7 @@ public class LikeServiceImpl implements ILikeService {
         serviceRules.checkIfLikeAlreadyExistForComment(user.getId(), commentId);
 
         Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new LikeException("Comment not found!"));
+            .orElseThrow(() -> new CommentException("Comment not found!"));
 
         Like like = Like.builder()
             .user(user)

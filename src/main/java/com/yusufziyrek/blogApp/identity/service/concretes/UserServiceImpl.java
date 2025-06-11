@@ -1,10 +1,12 @@
 package com.yusufziyrek.blogApp.identity.service.concretes;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.cache.annotation.*;
-import org.springframework.data.domain.*;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.yusufziyrek.blogApp.content.service.abstracts.IPostService;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = { "allUsers", "userDetails" }, keyGenerator = "cacheKeyGenerator")
 public class UserServiceImpl implements IUserService {
 
     private final IUserRepository userRepository;
@@ -30,51 +33,33 @@ public class UserServiceImpl implements IUserService {
     private final UserServiceRules serviceRules;
 
     @Override
-    @Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+    @Cacheable("allUsers")
     public PageResponse<GetAllUsersResponse> getAll(Pageable pageable) {
-        Page<User> usersPage = userRepository.findAll(pageable);
-        List<GetAllUsersResponse> items = usersPage.getContent().stream()
-            .map(user -> GetAllUsersResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .department(user.getDepartment())
-                .age(user.getAge())
+        var page = userRepository.findAll(pageable);
+        var items = page.getContent().stream()
+            .map(u -> GetAllUsersResponse.builder()
+                .id(u.getId())
+                .username(u.getUsername())
+                .department(u.getDepartment())
+                .age(u.getAge())
                 .build())
             .collect(Collectors.toList());
 
         return new PageResponse<>(
             items,
-            usersPage.getNumber(),
-            usersPage.getSize(),
-            usersPage.getTotalElements(),
-            usersPage.getTotalPages()
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages()
         );
     }
 
     @Override
-    @Cacheable(value = "userDetails", key = "#id")
+    @Cacheable("userDetails")
     public GetByIdUserResponse getById(Long id) {
-        User user = userRepository.findById(id)
+        var user = userRepository.findById(id)
             .orElseThrow(() -> new UserException("User id not exist !"));
-
-        List<String> titles = postService.getPostTitleForUser(id);
-
-        return GetByIdUserResponse.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .firstname(user.getFirstname())
-            .lastname(user.getLastname())
-            .department(user.getDepartment())
-            .age(user.getAge())
-            .titles(titles)
-            .build();
-    }
-
-    public GetByIdUserResponse getByUserName(String username) {
-        User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UserException("Username doesn't exist"));
-
-        List<String> titles = postService.getPostTitleForUser(user.getId());
+        var titles = postService.getPostTitleForUser(id);
 
         return GetByIdUserResponse.builder()
             .id(user.getId())
@@ -88,20 +73,36 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    @CacheEvict(value = { "userDetails", "allUsers" }, allEntries = true)
-    public User add(RegisterRequest registerRequest) {
-        serviceRules.checkIfUserNameExists(registerRequest.getUsername());
+    @Cacheable(value = "userDetails", key = "#username")
+    public GetByIdUserResponse getByUserName(String username) {
+        var user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UserException("Username doesn't exist"));
+        var titles = postService.getPostTitleForUser(user.getId());
 
-        User user = User.builder()
-            .firstname(registerRequest.getFirstname())
-            .lastname(registerRequest.getLastname())
-            .username(registerRequest.getUsername())
-            .email(registerRequest.getEmail())
-            .password(registerRequest.getPassword())
-            .department(registerRequest.getDepartment())
-            .age(registerRequest.getAge())
+        return GetByIdUserResponse.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .firstname(user.getFirstname())
+            .lastname(user.getLastname())
+            .department(user.getDepartment())
+            .age(user.getAge())
+            .titles(titles)
             .build();
+    }
 
+    @Override
+    @CacheEvict(value = "allUsers", allEntries = true)
+    public User add(RegisterRequest req) {
+        serviceRules.checkIfUserNameExists(req.getUsername());
+        var user = User.builder()
+            .firstname(req.getFirstname())
+            .lastname(req.getLastname())
+            .username(req.getUsername())
+            .email(req.getEmail())
+            .password(req.getPassword())
+            .department(req.getDepartment())
+            .age(req.getAge())
+            .build();
         return userRepository.save(user);
     }
 
@@ -110,18 +111,18 @@ public class UserServiceImpl implements IUserService {
         @CacheEvict(value = "userDetails", key = "#id"),
         @CacheEvict(value = "allUsers", allEntries = true)
     })
-    public User update(Long id, UpdateUserRequest updateRequest) {
-        User user = userRepository.findById(id)
+    public User update(Long id, UpdateUserRequest req) {
+        var existing = userRepository.findById(id)
             .orElseThrow(() -> new UserException("User id not exist !"));
-
-        user.setFirstname(updateRequest.getFirstname());
-        user.setLastname(updateRequest.getLastname());
-        user.setUsername(updateRequest.getUsername());
-        user.setPassword(updateRequest.getPassword());
-        user.setDepartment(updateRequest.getDepartment());
-        user.setAge(updateRequest.getAge());
-
-        return userRepository.save(user);
+        var updated = existing.toBuilder()
+            .firstname(req.getFirstname()   != null ? req.getFirstname()   : existing.getFirstname())
+            .lastname(req.getLastname()     != null ? req.getLastname()    : existing.getLastname())
+            .username(req.getUsername()     != null ? req.getUsername()    : existing.getUsername())
+            .password(req.getPassword()     != null ? req.getPassword()    : existing.getPassword())
+            .department(req.getDepartment() != null ? req.getDepartment()  : existing.getDepartment())
+            .age(req.getAge()               != null ? req.getAge()         : existing.getAge())
+            .build();
+        return userRepository.save(updated);
     }
 
     @Override

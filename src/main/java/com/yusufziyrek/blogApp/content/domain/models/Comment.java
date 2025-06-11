@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -23,7 +24,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "comments")
+@Table(name = "comments", indexes = { 
+		@Index(name = "idx_comments_user_id", columnList = "user_id"),
+		@Index(name = "idx_comments_post_id", columnList = "post_id"),
+		@Index(name = "idx_comments_created_date", columnList = "created_date") })
 @Getter
 @Setter
 @AllArgsConstructor
@@ -43,12 +47,12 @@ public class Comment {
 	private LocalDateTime createdDate;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	@JsonIgnore
 	private User user;
 
 	@ManyToOne
-	@JoinColumn(name = "post_id")
+	@JoinColumn(name = "post_id", nullable = false)
 	@JsonIgnore
 	private Post post;
 
@@ -58,11 +62,9 @@ public class Comment {
 
 	public void incrementLikeCount() {
 		this.likeCount++;
-
 	}
 
 	public void decrementLikeCount() {
 		this.likeCount--;
-
 	}
 }
