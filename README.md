@@ -101,7 +101,7 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 #### **Comment Management:**
 - **`GET /api/v1/comments/post/{postId}`**:  
   Returns comments for a specific post.
-- **`GET /api/v1/comments/user`**:  
+- **`GET /api/v1/comments/me`**:  
   Returns comments for the authenticated user.
 - **`GET /api/v1/comments/{id}`**:  
   Returns details for a specific comment.
