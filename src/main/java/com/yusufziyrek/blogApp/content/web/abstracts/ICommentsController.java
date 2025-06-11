@@ -27,7 +27,7 @@ public interface ICommentsController {
 	ResponseEntity<ApiResponse<List<GetAllCommentsForPostResponse>>> getAllForPost(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long postId);
 
-	@GetMapping("/user")
+	@GetMapping("/me")
 	ResponseEntity<ApiResponse<List<GetAllCommentsForUserResponse>>> getAllForUser(@AuthenticationPrincipal User user);
 
 	@GetMapping("/{id}")

@@ -3,12 +3,14 @@ package com.yusufziyrek.blogApp.content.dto.requests;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class CreateCommentRequest {
 
 	@NotEmpty(message = "text cannot be null")

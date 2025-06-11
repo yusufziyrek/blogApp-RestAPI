@@ -1,6 +1,8 @@
 package com.yusufziyrek.blogApp.content.service.concretes;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +23,6 @@ import com.yusufziyrek.blogApp.content.repo.ICommentRepository;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.ICommentService;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
-import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,85 +30,122 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements ICommentService {
 
-	private final ICommentRepository commentRepository;
-	private final IPostRepository postRepository;
-	private final IModelMapperService modelMapperService;
+    private final ICommentRepository commentRepository;
+    private final IPostRepository postRepository;
 
-	@Override
-	@Cacheable(value = "commentsForPost", key = "#postId")
-	public List<GetAllCommentsForPostResponse> getAllForPost(Long postId) {
-		List<Comment> comments = this.commentRepository.findByPostId(postId);
-		return comments.stream().map(comment -> {
-			GetAllCommentsForPostResponse commentResponse = this.modelMapperService.forResponse().map(comment,
-					GetAllCommentsForPostResponse.class);
-			commentResponse.setPostTitle(comment.getPost().getTitle());
-			commentResponse.setAuthorUser(comment.getUser().getUsername());
-			return commentResponse;
-		}).collect(Collectors.toList());
-	}
+    @Override
+    @Cacheable(value = "commentsForPost", key = "#postId")
+    public List<GetAllCommentsForPostResponse> getAllForPost(Long postId) {
+        return commentRepository.findByPostId(postId).stream()
+            .map(comment -> GetAllCommentsForPostResponse.builder()
+                .id(comment.getId())
+                .postTitle(comment.getPost().getTitle())
+                .authorUser(comment.getUser().getUsername())
+                .text(comment.getText())
+                .likeCount(comment.getLikeCount())
+                .createDate(Date.from(
+                    comment.getCreatedDate()
+                           .atZone(ZoneId.systemDefault())
+                           .toInstant()))
+                .build())
+            .collect(Collectors.toList());
+    }
 
-	@Override
-	@Cacheable(value = "commentsForUser", key = "#userId")
-	public List<GetAllCommentsForUserResponse> getAllForUser(Long userId) {
-		List<Comment> comments = this.commentRepository.findByUserId(userId);
-		return comments.stream()
-				.map(comment -> this.modelMapperService.forResponse().map(comment, GetAllCommentsForUserResponse.class))
-				.collect(Collectors.toList());
-	}
+    @Override
+    @Cacheable(value = "commentsForUser", key = "#userId")
+    public List<GetAllCommentsForUserResponse> getAllForUser(Long userId) {
+        return commentRepository.findByUserId(userId).stream()
+            .map(comment -> GetAllCommentsForUserResponse.builder()
+                .id(comment.getId())
+                .postId(comment.getPost().getId())
+                .userId(comment.getUser().getId())
+                .text(comment.getText())
+                .likeCount(comment.getLikeCount())
+                .createDate(Date.from(
+                    comment.getCreatedDate()
+                           .atZone(ZoneId.systemDefault())
+                           .toInstant()))
+                .build())
+            .collect(Collectors.toList());
+    }
 
-	@Override
-	@Cacheable(value = "commentDetails", key = "#id")
-	public GetByIdCommentResponse getById(Long id) {
-		Comment comment = this.commentRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Comment not found!"));
-		return this.modelMapperService.forResponse().map(comment, GetByIdCommentResponse.class);
-	}
+    @Override
+    @Cacheable(value = "commentDetails", key = "#id")
+    public GetByIdCommentResponse getById(Long id) {
+        Comment comment = commentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comment not found!"));
 
-	@Override
-	@Caching(evict = { @CacheEvict(value = "commentsForPost", key = "#postId"),
-			@CacheEvict(value = "commentsForUser", key = "#user.id") })
-	public Comment add(Long postId, CreateCommentRequest createCommentRequest, User user) {
-		Comment comment = new Comment();
-		comment.setText(createCommentRequest.getText());
-		comment.setUser(user);
-		comment.setPost(
-				this.postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found!")));
-		comment.setCreatedDate(LocalDateTime.now());
+        return GetByIdCommentResponse.builder()
+            .id(comment.getId())
+            .postId(comment.getPost().getId())
+            .userId(comment.getUser().getId())
+            .text(comment.getText())
+            .likeCount(comment.getLikeCount())
+            .createdDate(Date.from(
+                comment.getCreatedDate()
+                       .atZone(ZoneId.systemDefault())
+                       .toInstant()))
+            .build();
+    }
 
-		Post post = comment.getPost();
-		post.incrementCommentCount();
-		this.postRepository.save(post);
+    @Override
+    @Caching(evict = {
+        @CacheEvict(value = "commentsForPost", key = "#postId"),
+        @CacheEvict(value = "commentsForUser", key = "#user.id")
+    })
+    public Comment add(Long postId, CreateCommentRequest req, User user) {
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found!"));
 
-		return this.commentRepository.save(comment);
-	}
+        Comment comment = Comment.builder()
+            .text(req.getText())
+            .user(user)
+            .post(post)
+            .createdDate(LocalDateTime.now())
+            .build();
 
-	@Override
-	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
-			@CacheEvict(value = "commentsForPost", allEntries = true),
-			@CacheEvict(value = "commentsForUser", allEntries = true) })
-	public Comment update(Long id, UpdateCommentRequest updateCommentRequest, User user) {
-		Comment comment = this.commentRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Comment not found!"));
-		if (!comment.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to update this comment.");
-		}
-		comment.setText(updateCommentRequest.getText());
-		return this.commentRepository.save(comment);
-	}
+        post.incrementCommentCount();
+        postRepository.save(post);
 
-	@Override
-	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
-			@CacheEvict(value = "commentsForPost", allEntries = true),
-			@CacheEvict(value = "commentsForUser", allEntries = true) })
-	public void delete(Long id, User user) {
-		Comment comment = this.commentRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Comment not found!"));
-		if (!comment.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to delete this comment.");
-		}
-		Post post = comment.getPost();
-		post.decrementCommentCount();
-		this.postRepository.save(post);
-		this.commentRepository.deleteById(id);
-	}
+        return commentRepository.save(comment);
+    }
+
+    @Override
+    @Caching(evict = {
+        @CacheEvict(value = "commentDetails", key = "#id"),
+        @CacheEvict(value = "commentsForPost", allEntries = true),
+        @CacheEvict(value = "commentsForUser", allEntries = true)
+    })
+    public Comment update(Long id, UpdateCommentRequest req, User user) {
+        Comment comment = commentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comment not found!"));
+
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You are not allowed to update this comment.");
+        }
+
+        comment.setText(req.getText());
+        return commentRepository.save(comment);
+    }
+
+    @Override
+    @Caching(evict = {
+        @CacheEvict(value = "commentDetails", key = "#id"),
+        @CacheEvict(value = "commentsForPost", allEntries = true),
+        @CacheEvict(value = "commentsForUser", allEntries = true)
+    })
+    public void delete(Long id, User user) {
+        Comment comment = commentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comment not found!"));
+
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You are not allowed to delete this comment.");
+        }
+
+        Post post = comment.getPost();
+        post.decrementCommentCount();
+        postRepository.save(post);
+
+        commentRepository.deleteById(id);
+    }
 }

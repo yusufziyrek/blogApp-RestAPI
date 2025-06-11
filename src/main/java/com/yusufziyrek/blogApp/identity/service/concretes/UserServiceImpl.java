@@ -3,11 +3,8 @@ package com.yusufziyrek.blogApp.identity.service.concretes;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.*;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import com.yusufziyrek.blogApp.content.service.abstracts.IPostService;
@@ -21,7 +18,6 @@ import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
 import com.yusufziyrek.blogApp.identity.service.abstracts.IUserService;
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 import com.yusufziyrek.blogApp.shared.exception.UserException;
-import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,70 +25,111 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
 
-	private final IUserRepository userRepository;
-	private final IPostService postService;
-	private final IModelMapperService modelMapperService;
-	private final UserServiceRules serviceRules;
+    private final IUserRepository userRepository;
+    private final IPostService postService;
+    private final UserServiceRules serviceRules;
 
-	@Override
-	@Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
-	public PageResponse<GetAllUsersResponse> getAll(Pageable pageable) {
-		Page<User> users = this.userRepository.findAll(pageable);
-		return toPageResponse(users, GetAllUsersResponse.class);
-	}
+    @Override
+    @Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+    public PageResponse<GetAllUsersResponse> getAll(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAll(pageable);
+        List<GetAllUsersResponse> items = usersPage.getContent().stream()
+            .map(user -> GetAllUsersResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .department(user.getDepartment())
+                .age(user.getAge())
+                .build())
+            .collect(Collectors.toList());
 
-	@Override
-	@Cacheable(value = "userDetails", key = "#id")
-	public GetByIdUserResponse getById(Long id) {
-		User user = this.userRepository.findById(id).orElseThrow(() -> new UserException("User id not exist !"));
+        return new PageResponse<>(
+            items,
+            usersPage.getNumber(),
+            usersPage.getSize(),
+            usersPage.getTotalElements(),
+            usersPage.getTotalPages()
+        );
+    }
 
-		GetByIdUserResponse response = this.modelMapperService.forResponse().map(user, GetByIdUserResponse.class);
-		response.setTitles(this.postService.getPostTitleForUser(id));
+    @Override
+    @Cacheable(value = "userDetails", key = "#id")
+    public GetByIdUserResponse getById(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new UserException("User id not exist !"));
 
-		return response;
-	}
+        List<String> titles = postService.getPostTitleForUser(id);
 
-	public GetByIdUserResponse getByUserName(String username) {
-		User user = this.userRepository.findByUsername(username)
-				.orElseThrow(() -> new UserException("Username doesn't exist"));
-		return this.modelMapperService.forResponse().map(user, GetByIdUserResponse.class);
-	}
+        return GetByIdUserResponse.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .firstname(user.getFirstname())
+            .lastname(user.getLastname())
+            .department(user.getDepartment())
+            .age(user.getAge())
+            .titles(titles)
+            .build();
+    }
 
-	@Override
-	@CacheEvict(value = { "userDetails", "allUsers" }, allEntries = true)
-	public User add(RegisterRequest registerUserRequest) {
-		this.serviceRules.checkIfUserNameExists(registerUserRequest.getUsername());
-		User user = this.modelMapperService.forRequest().map(registerUserRequest, User.class);
-		return this.userRepository.save(user);
-	}
+    public GetByIdUserResponse getByUserName(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UserException("Username doesn't exist"));
 
-	@Override
-	@Caching(evict = { @CacheEvict(value = "userDetails", key = "#id"),
-			@CacheEvict(value = "allUsers", allEntries = true) })
-	public User update(Long id, UpdateUserRequest updateUserRequest) {
-		User user = this.userRepository.findById(id).orElseThrow(() -> new UserException("User id not exist !"));
-		user.setUsername(updateUserRequest.getUsername());
-		user.setFirstname(updateUserRequest.getFirstname());
-		user.setLastname(updateUserRequest.getLastname());
-		user.setPassword(updateUserRequest.getPassword());
-		user.setDepartment(updateUserRequest.getDepartment());
-		user.setAge(updateUserRequest.getAge());
+        List<String> titles = postService.getPostTitleForUser(user.getId());
 
-		return this.userRepository.save(user);
-	}
+        return GetByIdUserResponse.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .firstname(user.getFirstname())
+            .lastname(user.getLastname())
+            .department(user.getDepartment())
+            .age(user.getAge())
+            .titles(titles)
+            .build();
+    }
 
-	@Override
-	@Caching(evict = { @CacheEvict(value = "userDetails", key = "#id"),
-			@CacheEvict(value = "allUsers", allEntries = true) })
-	public void delete(Long id) {
-		this.userRepository.deleteById(id);
-	}
+    @Override
+    @CacheEvict(value = { "userDetails", "allUsers" }, allEntries = true)
+    public User add(RegisterRequest registerRequest) {
+        serviceRules.checkIfUserNameExists(registerRequest.getUsername());
 
-	private <T, U> PageResponse<U> toPageResponse(Page<T> source, Class<U> targetClass) {
-		List<U> items = source.getContent().stream()
-				.map(item -> modelMapperService.forResponse().map(item, targetClass)).collect(Collectors.toList());
+        User user = User.builder()
+            .firstname(registerRequest.getFirstname())
+            .lastname(registerRequest.getLastname())
+            .username(registerRequest.getUsername())
+            .email(registerRequest.getEmail())
+            .password(registerRequest.getPassword())
+            .department(registerRequest.getDepartment())
+            .age(registerRequest.getAge())
+            .build();
 
-		return new PageResponse<>(items, source.getNumber(), source.getSize(), source.getTotalElements(),
-				source.getTotalPages());
-	}
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Caching(evict = {
+        @CacheEvict(value = "userDetails", key = "#id"),
+        @CacheEvict(value = "allUsers", allEntries = true)
+    })
+    public User update(Long id, UpdateUserRequest updateRequest) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new UserException("User id not exist !"));
+
+        user.setFirstname(updateRequest.getFirstname());
+        user.setLastname(updateRequest.getLastname());
+        user.setUsername(updateRequest.getUsername());
+        user.setPassword(updateRequest.getPassword());
+        user.setDepartment(updateRequest.getDepartment());
+        user.setAge(updateRequest.getAge());
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Caching(evict = {
+        @CacheEvict(value = "userDetails", key = "#id"),
+        @CacheEvict(value = "allUsers", allEntries = true)
+    })
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
 }
