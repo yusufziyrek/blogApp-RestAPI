@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -63,13 +64,24 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmailOrUsername(request.getUsernameOrEmail(), request.getUsernameOrEmail())
-                .orElseThrow(() -> new UserException("User not found!"));
-        if (!user.isEnabled()) {
-            throw new AuthException("Your account is not verified yet. Please check your email for the activation link.");
-        }
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsernameOrEmail(), request.getPassword()));
+    	User user = userRepository
+    	            .findByEmailOrUsername(request.getUsernameOrEmail(), request.getUsernameOrEmail())
+    	            .orElseThrow(() -> new UserException("Kullanıcı bulunamadı!"));
+
+    	        if (!user.isEnabled()) {
+    	            throw new AuthException("Your account is not verified yet. Please check your email for the activation link.");
+    	        }
+
+    	        try {
+    	            authenticationManager.authenticate(
+    	                new UsernamePasswordAuthenticationToken(
+    	                    request.getUsernameOrEmail(),
+    	                    request.getPassword()
+    	                )
+    	            );
+    	        } catch (BadCredentialsException ex) {
+    	            throw new AuthException("Wrong password !");
+    	        }
         String accessToken = jwtUtil.generateToken(user.getEmail(), user.getId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
         return new AuthResponse(accessToken, refreshToken.getToken(), "Login successful!");

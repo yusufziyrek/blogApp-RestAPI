@@ -1,5 +1,6 @@
 package com.yusufziyrek.blogApp.identity.service.concretes;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheConfig;
@@ -7,6 +8,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.yusufziyrek.blogApp.content.service.abstracts.IPostService;
@@ -31,6 +34,7 @@ public class UserServiceImpl implements IUserService {
     private final IUserRepository userRepository;
     private final IPostService postService;
     private final UserServiceRules serviceRules;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Cacheable("allUsers")
@@ -76,7 +80,7 @@ public class UserServiceImpl implements IUserService {
     @Cacheable(value = "userDetails", key = "#username")
     public GetByIdUserResponse getByUserName(String username) {
         var user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UserException("Username doesn't exist"));
+            .orElseThrow(() -> new UserException("Username doesn't exist !"));
         var titles = postService.getPostTitleForUser(user.getId());
 
         return GetByIdUserResponse.builder()
@@ -111,17 +115,24 @@ public class UserServiceImpl implements IUserService {
         @CacheEvict(value = "userDetails", key = "#id"),
         @CacheEvict(value = "allUsers", allEntries = true)
     })
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public User update(Long id, UpdateUserRequest req) {
-        var existing = userRepository.findById(id)
-            .orElseThrow(() -> new UserException("User id not exist !"));
-        var updated = existing.toBuilder()
-            .firstname(req.getFirstname()   != null ? req.getFirstname()   : existing.getFirstname())
-            .lastname(req.getLastname()     != null ? req.getLastname()    : existing.getLastname())
-            .username(req.getUsername()     != null ? req.getUsername()    : existing.getUsername())
-            .password(req.getPassword()     != null ? req.getPassword()    : existing.getPassword())
-            .department(req.getDepartment() != null ? req.getDepartment()  : existing.getDepartment())
-            .age(req.getAge()               != null ? req.getAge()         : existing.getAge())
-            .build();
+    	User existing = userRepository.findById(id)
+                .orElseThrow(() -> new UserException("User id not exist !"));
+
+        String passwordToSave = req.getPassword() != null
+                ? passwordEncoder.encode(req.getPassword())
+                : existing.getPassword();
+
+        User updated = existing.toBuilder()
+                .firstname(  Objects.requireNonNullElse(req.getFirstname(),   existing.getFirstname()))
+                .lastname(   Objects.requireNonNullElse(req.getLastname(),    existing.getLastname()))
+                .username(   Objects.requireNonNullElse(req.getUsername(),    existing.getUsername()))
+                .password(   passwordToSave)
+                .department( Objects.requireNonNullElse(req.getDepartment(),  existing.getDepartment()))
+                .age(        Objects.requireNonNullElse(req.getAge(),         existing.getAge()))
+                .build();
+
         return userRepository.save(updated);
     }
 
@@ -130,7 +141,9 @@ public class UserServiceImpl implements IUserService {
         @CacheEvict(value = "userDetails", key = "#id"),
         @CacheEvict(value = "allUsers", allEntries = true)
     })
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public void delete(Long id) {
+    	userRepository.findById(id).orElseThrow(()-> new UserException("User id not exist !"));   	
         userRepository.deleteById(id);
     }
 }
