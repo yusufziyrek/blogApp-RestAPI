@@ -9,6 +9,7 @@ import com.yusufziyrek.blogApp.identity.domain.models.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,7 +28,9 @@ import lombok.Setter;
 @Table(name = "comments", indexes = { 
 		@Index(name = "idx_comments_user_id", columnList = "user_id"),
 		@Index(name = "idx_comments_post_id", columnList = "post_id"),
-		@Index(name = "idx_comments_created_date", columnList = "created_date") })
+		@Index(name = "idx_comments_created_date", columnList = "created_date"),
+		@Index(name = "idx_comments_user_post", columnList = "user_id, post_id"),
+		@Index(name = "idx_comments_post_created", columnList = "post_id, created_date") })
 @Getter
 @Setter
 @AllArgsConstructor
@@ -39,24 +42,26 @@ public class Comment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(columnDefinition = "TEXT")
+	@Column(columnDefinition = "TEXT", nullable = false)
 	private String text;
 
+	@Column(nullable = false)
 	private int likeCount = 0;
 
+	@Column(nullable = false)
 	private LocalDateTime createdDate;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	@JsonIgnore
 	private User user;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id", nullable = false)
 	@JsonIgnore
 	private Post post;
 
-	@OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonIgnore
 	private List<Like> likes;
 
@@ -65,6 +70,18 @@ public class Comment {
 	}
 
 	public void decrementLikeCount() {
-		this.likeCount--;
+		if (this.likeCount > 0) {
+			this.likeCount--;
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "Comment{" +
+				"id=" + id +
+				", text='" + text + '\'' +
+				", likeCount=" + likeCount +
+				", createdDate=" + createdDate +
+				'}';
 	}
 }

@@ -26,17 +26,48 @@ public class CacheConfig {
     @Bean
     public Caffeine<Object, Object> defaultCaffeine() {
         return Caffeine.newBuilder()
-                .expireAfterWrite(10, TimeUnit.MINUTES)
-                .maximumSize(500)
-                .recordStats();
+                .expireAfterWrite(15, TimeUnit.MINUTES)
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .maximumSize(1000)
+                .recordStats()
+                .weakKeys()
+                .weakValues();
     }
 
     @Bean
-    public CacheManager cacheManager(Caffeine<Object, Object> defaultCaffeine) {
+    public Caffeine<Object, Object> longLivedCaffeine() {
+        return Caffeine.newBuilder()
+                .expireAfterWrite(60, TimeUnit.MINUTES)
+                .expireAfterAccess(30, TimeUnit.MINUTES)
+                .maximumSize(500)
+                .recordStats()
+                .weakKeys()
+                .weakValues();
+    }
+
+    @Bean
+    public Caffeine<Object, Object> shortLivedCaffeine() {
+        return Caffeine.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .expireAfterAccess(2, TimeUnit.MINUTES)
+                .maximumSize(200)
+                .recordStats()
+                .weakKeys()
+                .weakValues();
+    }
+
+    @Bean
+    public CacheManager cacheManager(
+            Caffeine<Object, Object> defaultCaffeine,
+            Caffeine<Object, Object> longLivedCaffeine,
+            Caffeine<Object, Object> shortLivedCaffeine) {
+        
         String[] names = {
             "userDetails", "allUsers",
             "allPosts", "userPosts", "postDetails", "userPostTitles",
-            "commentsForPost", "commentsForUser", "commentDetails"
+            "commentsForPost", "commentsForUser", "commentDetails",
+            "likesForPost", "likesForComment", "likeDetails",
+            "searchResults"
         };
 
         return new CaffeineCacheManager(names) {
@@ -46,15 +77,13 @@ public class CacheConfig {
 
             @Override
             protected Cache createCaffeineCache(String cacheName) {
-                Set<String> longLived = Set.of("postDetails", "userDetails", "commentDetails");
+                Set<String> longLived = Set.of("postDetails", "userDetails", "commentDetails", "likeDetails");
+                Set<String> shortLived = Set.of("searchResults", "allPosts", "userPosts");
+                
                 if (longLived.contains(cacheName)) {
-                    return new CaffeineCache(cacheName,
-                        Caffeine.newBuilder()
-                            .expireAfterWrite(30, TimeUnit.MINUTES)
-                            .maximumSize(200)
-                            .recordStats()
-                            .build()
-                    );
+                    return new CaffeineCache(cacheName, longLivedCaffeine.build());
+                } else if (shortLived.contains(cacheName)) {
+                    return new CaffeineCache(cacheName, shortLivedCaffeine.build());
                 }
                 return new CaffeineCache(cacheName, defaultCaffeine.build());
             }

@@ -26,9 +26,11 @@ import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 import com.yusufziyrek.blogApp.shared.exception.PostException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @CacheConfig(keyGenerator = "cacheKeyGenerator")
 public class PostServiceImpl implements IPostService {
 
@@ -37,16 +39,11 @@ public class PostServiceImpl implements IPostService {
     @Override
     @Cacheable(value = "allPosts")
     public PageResponse<GetAllPostsResponse> getAll(Pageable pageable) {
+        log.debug("Fetching all posts with pagination: {}", pageable);
+        
         Page<Post> page = postRepository.findAll(pageable);
         List<GetAllPostsResponse> items = page.getContent().stream()
-            .map(post -> GetAllPostsResponse.builder()
-                .id(post.getId())
-                .authorUser(post.getUser().getUsername())
-                .title(post.getTitle())
-                .commentCount(post.getCommentCount())
-                .likeCount(post.getLikeCount())
-                .createdDate(post.getCreatedDate())
-                .build())
+            .map(this::mapToGetAllPostsResponse)
             .collect(Collectors.toList());
 
         return new PageResponse<>(
@@ -61,16 +58,11 @@ public class PostServiceImpl implements IPostService {
     @Override
     @Cacheable(value = "userPosts")
     public PageResponse<GetAllPostsResponse> getAllForUser(Pageable pageable, Long userId) {
+        log.debug("Fetching posts for user: {} with pagination: {}", userId, pageable);
+        
         Page<Post> page = postRepository.findAllByUserId(pageable, userId);
         List<GetAllPostsResponse> items = page.getContent().stream()
-            .map(post -> GetAllPostsResponse.builder()
-                .id(post.getId())
-                .authorUser(post.getUser().getUsername())
-                .title(post.getTitle())
-                .commentCount(post.getCommentCount())
-                .likeCount(post.getLikeCount())
-                .createdDate(post.getCreatedDate())
-                .build())
+            .map(this::mapToGetAllPostsResponse)
             .collect(Collectors.toList());
 
         return new PageResponse<>(
@@ -85,24 +77,20 @@ public class PostServiceImpl implements IPostService {
     @Override
     @Cacheable(value = "postDetails", key = "#id")
     public GetByIdPostResponse getById(Long id) {
-        Post post = postRepository.findById(id)
+        log.debug("Fetching post by id: {}", id);
+        
+        Post post = postRepository.findByIdWithUserFetch(id)
             .orElseThrow(() -> new PostException("Post id not exist !"));
 
-        return GetByIdPostResponse.builder()
-            .id(post.getId())
-            .authorUser(post.getUser().getUsername())
-            .title(post.getTitle())
-            .text(post.getText())
-            .commentCount(post.getCommentCount())
-            .likeCount(post.getLikeCount())
-            .createdDate(post.getCreatedDate())
-            .build();
+        return mapToGetByIdPostResponse(post);
     }
 
     @Override
     @Cacheable(value = "userPostTitles", key = "#userId")
     public List<String> getPostTitleForUser(Long userId) {
-        return postRepository.findByUserId(userId)
+        log.debug("Fetching post titles for user: {}", userId);
+        
+        return postRepository.findByUserIdOrderByCreatedDateDesc(userId)
             .stream()
             .map(Post::getTitle)
             .collect(Collectors.toList());
@@ -116,6 +104,8 @@ public class PostServiceImpl implements IPostService {
         @CacheEvict(value = "userPostTitles", key = "#user.id")
     })
     public Post createPost(CreatePostRequest req, User user) {
+        log.info("Creating new post for user: {}", user.getUsername());
+        
         Post toSave = Post.builder()
             .user(user)
             .title(req.getTitle())
@@ -124,7 +114,10 @@ public class PostServiceImpl implements IPostService {
             .updatedDate(LocalDateTime.now())
             .build();
 
-        return postRepository.save(toSave);
+        Post savedPost = postRepository.save(toSave);
+        log.info("Post created successfully with id: {}", savedPost.getId());
+        
+        return savedPost;
     }
 
     @Override
@@ -136,10 +129,14 @@ public class PostServiceImpl implements IPostService {
         @CacheEvict(value = "userPostTitles", key = "#user.id")
     })
     public Post update(Long id, UpdatePostRequest req, User user) {
+        log.info("Updating post with id: {} for user: {}", id, user.getUsername());
+        
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new PostException("Post id not exist !"));
 
         if (!post.getUser().getId().equals(user.getId())) {
+            log.warn("User {} attempted to update post {} which belongs to user {}", 
+                user.getUsername(), id, post.getUser().getUsername());
             throw new AccessDeniedException("You are not allowed to update this post.");
         }
 
@@ -147,7 +144,10 @@ public class PostServiceImpl implements IPostService {
         post.setText(req.getText());
         post.setUpdatedDate(LocalDateTime.now());
 
-        return postRepository.save(post);
+        Post updatedPost = postRepository.save(post);
+        log.info("Post updated successfully with id: {}", updatedPost.getId());
+        
+        return updatedPost;
     }
 
     @Override
@@ -159,13 +159,42 @@ public class PostServiceImpl implements IPostService {
         @CacheEvict(value = "userPostTitles", key = "#user.id")
     })
     public void delete(Long id, User user) {
+        log.info("Deleting post with id: {} for user: {}", id, user.getUsername());
+        
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new PostException("Post id not exist !"));
 
         if (!post.getUser().getId().equals(user.getId())) {
+            log.warn("User {} attempted to delete post {} which belongs to user {}", 
+                user.getUsername(), id, post.getUser().getUsername());
             throw new AccessDeniedException("You are not allowed to delete this post.");
         }
 
         postRepository.deleteById(id);
+        log.info("Post deleted successfully with id: {}", id);
+    }
+
+    // Helper methods for mapping
+    private GetAllPostsResponse mapToGetAllPostsResponse(Post post) {
+        return GetAllPostsResponse.builder()
+            .id(post.getId())
+            .authorUser(post.getUser().getUsername())
+            .title(post.getTitle())
+            .commentCount(post.getCommentCount())
+            .likeCount(post.getLikeCount())
+            .createdDate(post.getCreatedDate())
+            .build();
+    }
+
+    private GetByIdPostResponse mapToGetByIdPostResponse(Post post) {
+        return GetByIdPostResponse.builder()
+            .id(post.getId())
+            .authorUser(post.getUser().getUsername())
+            .title(post.getTitle())
+            .text(post.getText())
+            .commentCount(post.getCommentCount())
+            .likeCount(post.getLikeCount())
+            .createdDate(post.getCreatedDate())
+            .build();
     }
 }

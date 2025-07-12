@@ -9,6 +9,7 @@ import com.yusufziyrek.blogApp.identity.domain.models.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,7 +25,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "posts", indexes = { @Index(name = "idx_posts_user_id", columnList = "user_id") })
+@Table(name = "posts", indexes = { 
+    @Index(name = "idx_posts_user_id", columnList = "user_id"),
+    @Index(name = "idx_posts_created_date", columnList = "created_date"),
+    @Index(name = "idx_posts_title", columnList = "title"),
+    @Index(name = "idx_posts_user_created", columnList = "user_id, created_date")
+})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -36,50 +42,65 @@ public class Post {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(nullable = false, length = 255)
 	private String title;
 
-	@Column(columnDefinition = "TEXT")
+	@Column(columnDefinition = "TEXT", nullable = false)
 	private String text;
 
+	@Column(nullable = false)
 	private LocalDateTime createdDate;
 
+	@Column(nullable = false)
 	private LocalDateTime updatedDate;
 
+	@Column(nullable = false)
 	private int commentCount = 0;
 
+	@Column(nullable = false)
 	private int likeCount = 0;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
 	@JsonIgnore
 	private User user;
 
-	@OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonIgnore
 	private List<Comment> comments;
 
-	@OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonIgnore
 	private List<Like> likes;
 
 	public void incrementCommentCount() {
 		this.commentCount++;
-
 	}
 
 	public void decrementCommentCount() {
-		this.commentCount--;
-
+		if (this.commentCount > 0) {
+			this.commentCount--;
+		}
 	}
 
 	public void incrementLikeCount() {
 		this.likeCount++;
-
 	}
 
 	public void decrementLikeCount() {
-		this.likeCount--;
-
+		if (this.likeCount > 0) {
+			this.likeCount--;
+		}
 	}
 
+	@Override
+	public String toString() {
+		return "Post{" +
+				"id=" + id +
+				", title='" + title + '\'' +
+				", createdDate=" + createdDate +
+				", commentCount=" + commentCount +
+				", likeCount=" + likeCount +
+				'}';
+	}
 }
