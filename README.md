@@ -16,9 +16,9 @@ A modern blog application built with Spring Boot, featuring user authentication,
 - **Backend**: Spring Boot 3.x
 - **Database**: PostgreSQL
 - **Authentication**: JWT (JSON Web Tokens)
-- **Caching**: Redis
+- **Caching**: Caffeine Cache
 - **Build Tool**: Maven
-- **Java Version**: 21+
+- **Java Version**: 24
 
 ## Quick Start
 
@@ -26,7 +26,6 @@ A modern blog application built with Spring Boot, featuring user authentication,
 - Java 21 or higher
 - Maven 3.8+
 - PostgreSQL
-- Redis (optional, for caching)
 
 ### Installation
 
