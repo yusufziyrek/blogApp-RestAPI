@@ -10,24 +10,22 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
 
-	@NotEmpty(message = "First name cannot be null")
-	@Size(min = 2, max = 20, message = "First name size must be between 2 and 15 characters")
+	@NotEmpty(message = "First name cannot be empty")
+	@Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
 	private String firstname;
 
-	@NotEmpty(message = "Last name cannot be null")
-	@Size(min = 2, max = 20, message = "Last name size must be between 2 and 10 characters")
+	@NotEmpty(message = "Last name cannot be empty")
+	@Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
 	private String lastname;
 
 	@NotBlank(message = "Username cannot be empty")
-	@Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+	@Size(min = 3, max = 30, message = "Username must be between 3 and 30 characters")
 	private String username;
 
 	@NotBlank(message = "Email cannot be empty")
@@ -35,15 +33,15 @@ public class RegisterRequest {
 	private String email;
 
 	@NotBlank(message = "Password cannot be empty")
-	@Size(min = 6, max = 20, message = "Password must be at least 6 characters")
+	@Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
 	private String password;
 
-	@NotEmpty(message = "Department cannot be null")
-	@Size(min = 2, max = 25, message = "Department size must be between 2 and 25 characters")
+	@NotEmpty(message = "Department cannot be empty")
+	@Size(min = 2, max = 100, message = "Department must be between 2 and 100 characters")
 	private String department;
 
 	@NotNull(message = "Age cannot be null")
-	@Min(value = 18, message = "The age value must be at least 18")
-	@Max(value = 100, message = "The age value must be at most 100")
+	@Min(value = 18, message = "Age must be at least 18")
+	@Max(value = 100, message = "Age must be at most 100")
 	private int age;
 }

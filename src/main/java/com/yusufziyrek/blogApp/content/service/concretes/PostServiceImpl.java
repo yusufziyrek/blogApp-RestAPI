@@ -1,6 +1,5 @@
 package com.yusufziyrek.blogApp.content.service.concretes;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,12 +16,13 @@ import com.yusufziyrek.blogApp.content.dto.requests.CreatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.requests.UpdatePostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllPostsResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdPostResponse;
+import com.yusufziyrek.blogApp.content.mapper.PostMapper;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.IPostService;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.exception.PostException;
-import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,29 +31,28 @@ import lombok.RequiredArgsConstructor;
 public class PostServiceImpl implements IPostService {
 
 	private final IPostRepository postRepository;
-	private final IModelMapperService modelMapperService;
+	private final PostMapper postMapper;
 
 	@Override
-	@Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+	@Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort")
 	public PageResponse<GetAllPostsResponse> getAll(Pageable pageable) {
 		Page<Post> posts = this.postRepository.findAll(pageable);
-		return toPageResponse(posts, GetAllPostsResponse.class);
+		return toPageResponse(posts);
 	}
 
 	@Override
-	@Cacheable(value = "allPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #userId")
+	@Cacheable(value = "userPosts", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #userId")
 	public PageResponse<GetAllPostsResponse> getAllForUser(Pageable pageable, Long userId) {
 		Page<Post> posts = this.postRepository.findAllByUserId(pageable, userId);
-		return toPageResponse(posts, GetAllPostsResponse.class);
+		return toPageResponse(posts);
 	}
 
 	@Override
 	@Cacheable(value = "postDetails", key = "#id")
 	public GetByIdPostResponse getById(Long id) {
-		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
-		GetByIdPostResponse response = this.modelMapperService.forResponse().map(post, GetByIdPostResponse.class);
-		response.setAuthorUser(post.getUser().getUsername());
-		return response;
+		Post post = this.postRepository.findById(id)
+				.orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, id)));
+		return this.postMapper.toGetByIdResponse(post);
 	}
 
 	@Override
@@ -63,58 +62,55 @@ public class PostServiceImpl implements IPostService {
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "allPosts", allEntries = true),
-			@CacheEvict(value = "userPostTitles", key = "#user.id") })
+	@Caching(evict = { 
+		@CacheEvict(value = "allPosts", allEntries = true),
+		@CacheEvict(value = "userPosts", allEntries = true),
+		@CacheEvict(value = "userPostTitles", key = "#user.id") 
+	})
 	public Post createPost(CreatePostRequest createPostRequest, User user) {
-		Post post = new Post();
+		Post post = this.postMapper.toPost(createPostRequest);
 		post.setUser(user);
-		post.setTitle(createPostRequest.getTitle());
-		post.setText(createPostRequest.getText());
-		post.setCreatedDate(LocalDateTime.now());
-		post.setUpdatedDate(LocalDateTime.now());
-
 		return this.postRepository.save(post);
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "postDetails", key = "#id"),
-			@CacheEvict(value = "allPosts", allEntries = true) })
+	@Caching(evict = { 
+		@CacheEvict(value = "postDetails", key = "#id"),
+		@CacheEvict(value = "allPosts", allEntries = true),
+		@CacheEvict(value = "userPosts", allEntries = true),
+		@CacheEvict(value = "userPostTitles", key = "#user.id") 
+	})
 	public Post update(Long id, UpdatePostRequest updatePostRequest, User user) {
-		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
+		Post post = this.postRepository.findById(id)
+				.orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, id)));
 		if (!post.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to update this post.");
+			throw new AccessDeniedException(ErrorMessages.POST_ACCESS_DENIED_UPDATE);
 		}
-		post.setTitle(updatePostRequest.getTitle());
-		post.setText(updatePostRequest.getText());
-		post.setUpdatedDate(LocalDateTime.now());
-
+		this.postMapper.updatePostFromRequest(post, updatePostRequest);
 		return this.postRepository.save(post);
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "postDetails", key = "#id"),
-			@CacheEvict(value = "allPosts", allEntries = true),
-			@CacheEvict(value = "userPostTitles", key = "#user.id") })
+	@Caching(evict = { 
+		@CacheEvict(value = "postDetails", key = "#id"),
+		@CacheEvict(value = "allPosts", allEntries = true),
+		@CacheEvict(value = "userPosts", allEntries = true),
+		@CacheEvict(value = "userPostTitles", key = "#user.id") 
+	})
 	public Long delete(Long id, User user) {
-		Post post = this.postRepository.findById(id).orElseThrow(() -> new PostException("Post id not exist !"));
+		Post post = this.postRepository.findById(id)
+				.orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, id)));
 		if (!post.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to delete this post.");
+			throw new AccessDeniedException(ErrorMessages.POST_ACCESS_DENIED_DELETE);
 		}
 		Long userId = post.getUser().getId();
 		this.postRepository.deleteById(id);
 		return userId;
 	}
 
-	private <T, U> PageResponse<U> toPageResponse(Page<T> source, Class<U> targetClass) {
-		List<U> items = source.getContent().stream().map(item -> {
-			U response = modelMapperService.forResponse().map(item, targetClass);
-			if (item instanceof Post && response instanceof GetAllPostsResponse) {
-				GetAllPostsResponse postResponse = (GetAllPostsResponse) response;
-				Post post = (Post) item;
-				postResponse.setAuthorUser(post.getUser().getUsername());
-			}
-			return response;
-		}).collect(Collectors.toList());
+	private PageResponse<GetAllPostsResponse> toPageResponse(Page<Post> source) {
+		List<GetAllPostsResponse> items = source.getContent().stream()
+				.map(postMapper::toGetAllPostsResponse).collect(Collectors.toList());
 
 		return new PageResponse<>(items, source.getNumber(), source.getSize(), source.getTotalElements(),
 				source.getTotalPages());

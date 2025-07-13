@@ -20,6 +20,7 @@ import com.yusufziyrek.blogApp.content.service.abstracts.ICommentService;
 import com.yusufziyrek.blogApp.content.web.abstracts.ICommentsController;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
+import com.yusufziyrek.blogApp.shared.dto.ResponseMessages;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -36,21 +37,21 @@ public class CommentsController implements ICommentsController {
 	public ResponseEntity<ApiResponse<List<GetAllCommentsForPostResponse>>> getAllForPost(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long postId) {
 		List<GetAllCommentsForPostResponse> comments = commentService.getAllForPost(postId);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Comments for post retrieved successfully", comments));
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.COMMENTS_FOR_POST_RETRIEVED_SUCCESSFULLY, comments));
 	}
 
 	@Override
 	public ResponseEntity<ApiResponse<List<GetAllCommentsForUserResponse>>> getAllForUser(
 			@AuthenticationPrincipal User user) {
 		List<GetAllCommentsForUserResponse> comments = commentService.getAllForUser(user.getId());
-		return ResponseEntity.ok(new ApiResponse<>(true, "Comments for user retrieved successfully", comments));
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.COMMENTS_FOR_USER_RETRIEVED_SUCCESSFULLY, comments));
 	}
 
 	@Override
 	public ResponseEntity<ApiResponse<GetByIdCommentResponse>> getById(
 			@PathVariable @Positive(message = "Comment ID must be a positive number") Long id) {
 		GetByIdCommentResponse comment = commentService.getById(id);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Comment retrieved successfully", comment));
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.COMMENT_RETRIEVED_SUCCESSFULLY, comment));
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class CommentsController implements ICommentsController {
 			@RequestBody @Valid CreateCommentRequest createCommentRequest, @AuthenticationPrincipal User user) {
 		Comment createdComment = commentService.add(postId, createCommentRequest, user);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ApiResponse<>(true, "Comment added successfully", createdComment));
+				.body(new ApiResponse<>(true, ResponseMessages.COMMENT_ADDED_SUCCESSFULLY, createdComment));
 	}
 
 	@Override
@@ -67,7 +68,7 @@ public class CommentsController implements ICommentsController {
 			@PathVariable @Positive(message = "Comment ID must be a positive number") Long id,
 			@RequestBody @Valid UpdateCommentRequest updateCommentRequest, @AuthenticationPrincipal User user) {
 		Comment updatedComment = commentService.update(id, updateCommentRequest, user);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Comment updated successfully", updatedComment));
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.COMMENT_UPDATED_SUCCESSFULLY, updatedComment));
 	}
 
 	@Override
@@ -75,6 +76,7 @@ public class CommentsController implements ICommentsController {
 			@PathVariable @Positive(message = "Comment ID must be a positive number") Long id,
 			@AuthenticationPrincipal User user) {
 		commentService.delete(id, user);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Comment deleted successfully", null));
+		return ResponseEntity.status(HttpStatus.NO_CONTENT)
+				.body(new ApiResponse<>(true, ResponseMessages.COMMENT_DELETED_SUCCESSFULLY, null));
 	}
 }

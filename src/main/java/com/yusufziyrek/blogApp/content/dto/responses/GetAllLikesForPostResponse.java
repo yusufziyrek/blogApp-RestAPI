@@ -1,16 +1,17 @@
 package com.yusufziyrek.blogApp.content.dto.responses;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetAllLikesForPostResponse {
 
 	private Long id;
-	private String userWhoLiked;
-	private String likedPostTitle;
+	private String username;
 
 }

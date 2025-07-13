@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,6 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
 		Optional<User> user = userRepository.findByEmailOrUsername(usernameOrEmail, usernameOrEmail);
-		return user.orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));
+		return user.orElseThrow(() -> new UsernameNotFoundException(String.format(ErrorMessages.USER_NOT_FOUND_BY_EMAIL, usernameOrEmail)));
 	}
 }

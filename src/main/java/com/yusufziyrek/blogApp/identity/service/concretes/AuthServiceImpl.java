@@ -19,6 +19,7 @@ import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
 import com.yusufziyrek.blogApp.identity.repo.IVerificationTokenRepository;
 import com.yusufziyrek.blogApp.identity.service.abstracts.IAuthService;
 import com.yusufziyrek.blogApp.shared.exception.AuthException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.security.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -35,9 +36,11 @@ public class AuthServiceImpl implements IAuthService {
     private final AuthenticationManager authenticationManager;
 
     public String register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())
-                || userRepository.existsByUsername(request.getUsername())) {
-            throw new AuthException("Email or Username already in use!");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AuthException(String.format(ErrorMessages.EMAIL_ALREADY_EXISTS, request.getEmail()));
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AuthException(String.format(ErrorMessages.USERNAME_ALREADY_EXISTS, request.getUsername()));
         }
         User user = new User();
         user.setEmail(request.getEmail());
@@ -63,9 +66,9 @@ public class AuthServiceImpl implements IAuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmailOrUsername(request.getUsernameOrEmail(), request.getUsernameOrEmail())
-                .orElseThrow(() -> new AuthException("User not found!"));
+                .orElseThrow(() -> new AuthException(String.format(ErrorMessages.USER_NOT_FOUND_BY_EMAIL, request.getUsernameOrEmail())));
         if (!user.isEnabled()) {
-            throw new AuthException("Your account is not verified yet. Please check your email for the activation link.");
+            throw new AuthException(ErrorMessages.USER_ACCOUNT_NOT_VERIFIED);
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsernameOrEmail(), request.getPassword()));
@@ -76,9 +79,9 @@ public class AuthServiceImpl implements IAuthService {
 
     public String verifyAccount(String token) {
         var verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new AuthException("Invalid or non-existing token!"));
+                .orElseThrow(() -> new AuthException(ErrorMessages.INVALID_TOKEN));
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new AuthException("Token expired!");
+            throw new AuthException(ErrorMessages.TOKEN_EXPIRED);
         }
         User user = verificationToken.getUser();
         user.setEnabled(true);

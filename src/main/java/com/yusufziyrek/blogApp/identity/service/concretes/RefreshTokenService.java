@@ -5,6 +5,7 @@ import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.identity.repo.IRefreshTokenRepository;
 import com.yusufziyrek.blogApp.identity.repo.IUserRepository;
 import com.yusufziyrek.blogApp.shared.exception.AuthException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +31,7 @@ public class RefreshTokenService {
 
 	public RefreshToken createRefreshToken(Long userId) {
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new AuthException("User not found with id: " + userId));
+				.orElseThrow(() -> new AuthException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, userId)));
 		RefreshToken refreshToken = new RefreshToken();
 		refreshToken.setUser(user);
 		refreshToken.setToken(UUID.randomUUID().toString());
@@ -41,14 +42,14 @@ public class RefreshTokenService {
 	public RefreshToken verifyExpiration(RefreshToken token) {
 		if (token.getExpiryDate().isBefore(Instant.now())) {
 			refreshTokenRepository.delete(token);
-			throw new AuthException("Refresh token expired. Please login again.");
+			throw new AuthException(ErrorMessages.REFRESH_TOKEN_EXPIRED);
 		}
 		return token;
 	}
 
 	public int deleteByUserId(Long userId) {
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new AuthException("User not found with id: " + userId));
+				.orElseThrow(() -> new AuthException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, userId)));
 		return refreshTokenRepository.deleteByUser(user);
 	}
 }

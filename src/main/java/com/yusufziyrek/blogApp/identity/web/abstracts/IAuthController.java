@@ -31,5 +31,5 @@ public interface IAuthController {
 	ResponseEntity<ApiResponse<String>> verifyAccount(@RequestParam("token") String token);
 
 	@PostMapping("/refresh")
-	ResponseEntity<ApiResponse<Map<String, String>>> refreshToken(@RequestBody Map<String, String> request);
+	ResponseEntity<ApiResponse<Map<String, String>>> refreshToken(@RequestBody @Valid Map<String, String> request);
 }

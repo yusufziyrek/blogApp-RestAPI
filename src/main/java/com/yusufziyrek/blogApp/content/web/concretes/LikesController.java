@@ -20,6 +20,7 @@ import com.yusufziyrek.blogApp.content.service.abstracts.ILikeService;
 import com.yusufziyrek.blogApp.content.web.abstracts.ILikesController;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
+import com.yusufziyrek.blogApp.shared.dto.ResponseMessages;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -36,21 +37,21 @@ public class LikesController implements ILikesController {
 	public ResponseEntity<ApiResponse<List<GetAllLikesForPostResponse>>> getAllForPost(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long postId) {
 		List<GetAllLikesForPostResponse> likes = likeService.getAllForPost(postId);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Likes for post retrieved successfully", likes));
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.LIKES_FOR_POST_RETRIEVED_SUCCESSFULLY, likes));
 	}
 
 	@Override
 	public ResponseEntity<ApiResponse<List<GetAllLikesForCommentResponse>>> getAllForComment(
 			@PathVariable @Positive(message = "Comment ID must be a positive number") Long commentId) {
 		List<GetAllLikesForCommentResponse> likes = likeService.getAllLikesForComment(commentId);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Likes for comment retrieved successfully", likes));
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.LIKES_FOR_COMMENT_RETRIEVED_SUCCESSFULLY, likes));
 	}
 
 	@Override
 	public ResponseEntity<ApiResponse<GetByIdLikeResponse>> getById(
 			@PathVariable @Positive(message = "Like ID must be a positive number") Long id) {
 		GetByIdLikeResponse like = likeService.getById(id);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Like retrieved successfully", like));
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.LIKE_RETRIEVED_SUCCESSFULLY, like));
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class LikesController implements ILikesController {
 			@RequestBody @Valid CreateLikeForPostRequest createLikeForPostRequest, @AuthenticationPrincipal User user) {
 		Like like = likeService.addLikeForPost(postId, createLikeForPostRequest, user);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ApiResponse<>(true, "Like for post added successfully", like));
+				.body(new ApiResponse<>(true, ResponseMessages.LIKE_FOR_POST_ADDED_SUCCESSFULLY, like));
 	}
 
 	@Override
@@ -69,7 +70,7 @@ public class LikesController implements ILikesController {
 			@AuthenticationPrincipal User user) {
 		Like like = likeService.addLikeForComment(commentId, createLikeForCommentRequest, user);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ApiResponse<>(true, "Like for comment added successfully", like));
+				.body(new ApiResponse<>(true, ResponseMessages.LIKE_FOR_COMMENT_ADDED_SUCCESSFULLY, like));
 	}
 
 	@Override
@@ -77,7 +78,8 @@ public class LikesController implements ILikesController {
 			@PathVariable @Positive(message = "Like ID must be a positive number") Long likeId,
 			@AuthenticationPrincipal User user) {
 		likeService.dislikeForPost(likeId, user);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Disliked post successfully", null));
+		return ResponseEntity.status(HttpStatus.NO_CONTENT)
+				.body(new ApiResponse<>(true, ResponseMessages.LIKE_REMOVED_FROM_POST_SUCCESSFULLY, null));
 	}
 
 	@Override
@@ -85,6 +87,7 @@ public class LikesController implements ILikesController {
 			@PathVariable @Positive(message = "Like ID must be a positive number") Long likeId,
 			@AuthenticationPrincipal User user) {
 		likeService.dislikeForComment(likeId, user);
-		return ResponseEntity.ok(new ApiResponse<>(true, "Disliked comment successfully", null));
+		return ResponseEntity.status(HttpStatus.NO_CONTENT)
+				.body(new ApiResponse<>(true, ResponseMessages.LIKE_REMOVED_FROM_COMMENT_SUCCESSFULLY, null));
 	}
 }

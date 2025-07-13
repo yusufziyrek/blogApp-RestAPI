@@ -19,6 +19,7 @@ import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 @Validated
@@ -32,7 +33,7 @@ public interface IUsersController {
 	ResponseEntity<ApiResponse<GetByIdUserResponse>> getProfileByUser(@AuthenticationPrincipal User user);
 
 	@GetMapping("/by-username/{username}")
-	ResponseEntity<ApiResponse<GetByIdUserResponse>> getByUserName(@PathVariable String username);
+	ResponseEntity<ApiResponse<GetByIdUserResponse>> getByUserName(@PathVariable @NotBlank(message = "Username cannot be empty") String username);
 
 	@GetMapping("/{id}")
 	ResponseEntity<ApiResponse<GetByIdUserResponse>> getById(

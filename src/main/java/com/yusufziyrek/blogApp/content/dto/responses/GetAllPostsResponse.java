@@ -3,19 +3,23 @@ package com.yusufziyrek.blogApp.content.dto.responses;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetAllPostsResponse {
 
 	private Long id;
-	private String authorUser;
 	private String title;
+	private String text;
+	private LocalDateTime createdDate;
+	private LocalDateTime updatedDate;
 	private int commentCount;
 	private int likeCount;
-	private LocalDateTime createdDate;
+	private String authorUser;
 
 }

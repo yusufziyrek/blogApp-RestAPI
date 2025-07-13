@@ -1,7 +1,6 @@
 package com.yusufziyrek.blogApp.content.service.concretes;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -15,13 +14,16 @@ import com.yusufziyrek.blogApp.content.dto.requests.CreateLikeForPostRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllLikesForCommentResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllLikesForPostResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdLikeResponse;
+import com.yusufziyrek.blogApp.content.mapper.LikeMapper;
 import com.yusufziyrek.blogApp.content.repo.ICommentRepository;
 import com.yusufziyrek.blogApp.content.repo.ILikeRepository;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.ILikeService;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
+import com.yusufziyrek.blogApp.shared.exception.CommentException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.exception.LikeException;
-import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
+import com.yusufziyrek.blogApp.shared.exception.PostException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,39 +34,26 @@ public class LikeServiceImpl implements ILikeService {
 	private final ILikeRepository likeRepository;
 	private final IPostRepository postRepository;
 	private final ICommentRepository commentRepository;
-	private final IModelMapperService modelMapperService;
+	private final LikeMapper likeMapper;
 	private final LikeServiceRules serviceRules;
 
 	@Override
 	public List<GetAllLikesForPostResponse> getAllForPost(Long postId) {
 	    List<Like> likes = this.likeRepository.findByPostId(postId);
-	    return likes.stream()
-	            .map(like -> {
-	                GetAllLikesForPostResponse response = this.modelMapperService.forResponse()
-	                        .map(like, GetAllLikesForPostResponse.class);
-	                response.setUserWhoLiked(like.getUser().getUsername());
-	                return response;
-	            })
-	            .collect(Collectors.toList());
+	    return this.likeMapper.toGetAllLikesForPostResponseList(likes);
 	}
 
 	@Override
 	public List<GetAllLikesForCommentResponse> getAllLikesForComment(Long commentId) {
 	    List<Like> likes = this.likeRepository.findByCommentId(commentId);
-	    return likes.stream()
-	            .map(like -> {
-	                GetAllLikesForCommentResponse response = this.modelMapperService.forResponse()
-	                        .map(like, GetAllLikesForCommentResponse.class);
-	                response.setUserWhoLiked(like.getUser().getUsername());
-	                return response;
-	            })
-	            .collect(Collectors.toList());
+	    return this.likeMapper.toGetAllLikesForCommentResponseList(likes);
 	}
 
 	@Override
 	public GetByIdLikeResponse getById(Long id) {
-		Like like = this.likeRepository.findById(id).orElseThrow();
-		return this.modelMapperService.forResponse().map(like, GetByIdLikeResponse.class);
+		Like like = this.likeRepository.findById(id)
+				.orElseThrow(() -> new LikeException(String.format(ErrorMessages.LIKE_NOT_FOUND_BY_ID, id)));
+		return this.likeMapper.toGetByIdResponse(like);
 	}
 
 	@Override
@@ -73,7 +62,7 @@ public class LikeServiceImpl implements ILikeService {
 
 		Like like = new Like();
 		like.setUser(user);
-		like.setPost(this.postRepository.findById(postId).orElseThrow(() -> new LikeException("Post not found!")));
+		like.setPost(this.postRepository.findById(postId).orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, postId))));
 
 		Post post = like.getPost();
 		post.incrementLikeCount();
@@ -89,7 +78,7 @@ public class LikeServiceImpl implements ILikeService {
 		Like like = new Like();
 		like.setUser(user);
 		like.setComment(
-				this.commentRepository.findById(commentId).orElseThrow(() -> new LikeException("Comment not found!")));
+				this.commentRepository.findById(commentId).orElseThrow(() -> new CommentException(String.format(ErrorMessages.COMMENT_NOT_FOUND_BY_ID, commentId))));
 
 		Comment comment = like.getComment();
 		comment.incrementLikeCount();
@@ -100,9 +89,9 @@ public class LikeServiceImpl implements ILikeService {
 
 	@Override
 	public void dislikeForPost(Long likeId, User user) {
-		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException("Like not found!"));
+		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException(String.format(ErrorMessages.LIKE_NOT_FOUND_BY_ID, likeId)));
 		if (!like.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to remove this like.");
+			throw new AccessDeniedException(ErrorMessages.LIKE_ACCESS_DENIED_DELETE);
 		}
 		Post post = like.getPost();
 		post.decrementLikeCount();
@@ -112,9 +101,9 @@ public class LikeServiceImpl implements ILikeService {
 
 	@Override
 	public void dislikeForComment(Long likeId, User user) {
-		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException("Like not found!"));
+		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException(String.format(ErrorMessages.LIKE_NOT_FOUND_BY_ID, likeId)));
 		if (!like.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to remove this like.");
+			throw new AccessDeniedException(ErrorMessages.LIKE_ACCESS_DENIED_DELETE);
 		}
 		Comment comment = like.getComment();
 		comment.decrementLikeCount();

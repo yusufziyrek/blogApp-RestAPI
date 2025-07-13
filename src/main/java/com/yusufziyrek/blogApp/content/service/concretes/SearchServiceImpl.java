@@ -31,11 +31,13 @@ public class SearchServiceImpl implements ISearchService {
                     .getContent().stream()
                     .map(post -> new GetAllPostsResponse(
                         post.getId(),
-                        post.getUser().getUsername(),  
                         post.getTitle(),
+                        post.getText(),
+                        post.getCreatedDate(),
+                        post.getUpdatedDate(),
                         post.getCommentCount(),
                         post.getLikeCount(),
-                        post.getCreatedDate()))
+                        post.getUser().getUsername()))
                     .collect(Collectors.toList());
             result.setBlogPosts(postDTOs);
         }
@@ -47,12 +49,12 @@ public class SearchServiceImpl implements ISearchService {
                     .getContent().stream()
                     .map(user -> new GetByIdUserResponse(
                         user.getId(),
-                        user.getUsername(),
                         user.getFirstname(),
                         user.getLastname(),
+                        user.getUsername(),
+                        user.getEmail(),
                         user.getDepartment(),
-                        user.getAge(),
-                        null))
+                        user.getAge()))
                     .collect(Collectors.toList());
             result.setUsers(userDTOs);
         }

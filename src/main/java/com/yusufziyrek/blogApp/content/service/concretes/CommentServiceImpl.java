@@ -1,8 +1,6 @@
 package com.yusufziyrek.blogApp.content.service.concretes;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,13 +15,14 @@ import com.yusufziyrek.blogApp.content.dto.requests.UpdateCommentRequest;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllCommentsForPostResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetAllCommentsForUserResponse;
 import com.yusufziyrek.blogApp.content.dto.responses.GetByIdCommentResponse;
+import com.yusufziyrek.blogApp.content.mapper.CommentMapper;
 import com.yusufziyrek.blogApp.content.repo.ICommentRepository;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.ICommentService;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
 import com.yusufziyrek.blogApp.shared.exception.CommentException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.exception.PostException;
-import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,48 +32,41 @@ public class CommentServiceImpl implements ICommentService {
 
 	private final ICommentRepository commentRepository;
 	private final IPostRepository postRepository;
-	private final IModelMapperService modelMapperService;
+	private final CommentMapper commentMapper;
 
 	@Override
 	@Cacheable(value = "commentsForPost", key = "#postId")
 	public List<GetAllCommentsForPostResponse> getAllForPost(Long postId) {
 		List<Comment> comments = this.commentRepository.findByPostId(postId);
-		return comments.stream().map(comment -> {
-			GetAllCommentsForPostResponse commentResponse = this.modelMapperService.forResponse().map(comment,
-					GetAllCommentsForPostResponse.class);
-			commentResponse.setPostTitle(comment.getPost().getTitle());
-			commentResponse.setAuthorUser(comment.getUser().getUsername());
-			return commentResponse;
-		}).collect(Collectors.toList());
+		return this.commentMapper.toGetAllCommentsForPostResponseList(comments);
 	}
 
 	@Override
 	@Cacheable(value = "commentsForUser", key = "#userId")
 	public List<GetAllCommentsForUserResponse> getAllForUser(Long userId) {
 		List<Comment> comments = this.commentRepository.findByUserId(userId);
-		return comments.stream()
-				.map(comment -> this.modelMapperService.forResponse().map(comment, GetAllCommentsForUserResponse.class))
-				.collect(Collectors.toList());
+		return this.commentMapper.toGetAllCommentsForUserResponseList(comments);
 	}
 
 	@Override
 	@Cacheable(value = "commentDetails", key = "#id")
 	public GetByIdCommentResponse getById(Long id) {
 		Comment comment = this.commentRepository.findById(id)
-				.orElseThrow(() -> new CommentException("Comment not found!"));
-		return this.modelMapperService.forResponse().map(comment, GetByIdCommentResponse.class);
+				.orElseThrow(() -> new CommentException(String.format(ErrorMessages.COMMENT_NOT_FOUND_BY_ID, id)));
+		return this.commentMapper.toGetByIdResponse(comment);
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "commentsForPost", key = "#postId"),
-			@CacheEvict(value = "commentsForUser", key = "#user.id") })
+	@Caching(evict = { 
+		@CacheEvict(value = "commentsForPost", key = "#postId"),
+		@CacheEvict(value = "commentsForUser", key = "#user.id"),
+		@CacheEvict(value = "postDetails", key = "#postId")
+	})
 	public Comment add(Long postId, CreateCommentRequest createCommentRequest, User user) {
-		Comment comment = new Comment();
-		comment.setText(createCommentRequest.getText());
+		Comment comment = this.commentMapper.toComment(createCommentRequest);
 		comment.setUser(user);
 		comment.setPost(
-				this.postRepository.findById(postId).orElseThrow(() -> new PostException("Post not found!")));
-		comment.setCreatedDate(LocalDateTime.now());
+				this.postRepository.findById(postId).orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, postId))));
 
 		Post post = comment.getPost();
 		post.incrementCommentCount();
@@ -84,28 +76,33 @@ public class CommentServiceImpl implements ICommentService {
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
-			@CacheEvict(value = "commentsForPost", allEntries = true),
-			@CacheEvict(value = "commentsForUser", allEntries = true) })
+	@Caching(evict = { 
+		@CacheEvict(value = "commentDetails", key = "#id"),
+		@CacheEvict(value = "commentsForPost", allEntries = true),
+		@CacheEvict(value = "commentsForUser", allEntries = true) 
+	})
 	public Comment update(Long id, UpdateCommentRequest updateCommentRequest, User user) {
 		Comment comment = this.commentRepository.findById(id)
-				.orElseThrow(() -> new CommentException("Comment not found!"));
+				.orElseThrow(() -> new CommentException(String.format(ErrorMessages.COMMENT_NOT_FOUND_BY_ID, id)));
 		if (!comment.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to update this comment.");
+			throw new AccessDeniedException(ErrorMessages.COMMENT_ACCESS_DENIED_UPDATE);
 		}
-		comment.setText(updateCommentRequest.getText());
+		this.commentMapper.updateCommentFromRequest(comment, updateCommentRequest);
 		return this.commentRepository.save(comment);
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "commentDetails", key = "#id"),
-			@CacheEvict(value = "commentsForPost", allEntries = true),
-			@CacheEvict(value = "commentsForUser", allEntries = true) })
+	@Caching(evict = { 
+		@CacheEvict(value = "commentDetails", key = "#id"),
+		@CacheEvict(value = "commentsForPost", allEntries = true),
+		@CacheEvict(value = "commentsForUser", allEntries = true),
+		@CacheEvict(value = "postDetails", key = "#comment.post.id")
+	})
 	public void delete(Long id, User user) {
 		Comment comment = this.commentRepository.findById(id)
-				.orElseThrow(() -> new CommentException("Comment not found!"));
+				.orElseThrow(() -> new CommentException(String.format(ErrorMessages.COMMENT_NOT_FOUND_BY_ID, id)));
 		if (!comment.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException("You are not allowed to delete this comment.");
+			throw new AccessDeniedException(ErrorMessages.COMMENT_ACCESS_DENIED_DELETE);
 		}
 		Post post = comment.getPost();
 		post.decrementCommentCount();

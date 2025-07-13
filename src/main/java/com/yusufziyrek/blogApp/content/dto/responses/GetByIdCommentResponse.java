@@ -1,21 +1,21 @@
 package com.yusufziyrek.blogApp.content.dto.responses;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetByIdCommentResponse {
 
 	private Long id;
-	private Long postId;
-	private Long userId;
 	private String text;
 	private int likeCount;
-	private Date createdDate;
+	private LocalDateTime createdDate;
 
 }
