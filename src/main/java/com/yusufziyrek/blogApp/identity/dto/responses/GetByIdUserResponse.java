@@ -3,16 +3,12 @@ package com.yusufziyrek.blogApp.identity.dto.responses;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class GetByIdUserResponse {
 
 	private Long id;

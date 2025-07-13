@@ -3,16 +3,12 @@ package com.yusufziyrek.blogApp.content.dto.responses;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Getter
-@Setter
 public class GetAllPostsResponse {
 
 	private Long id;

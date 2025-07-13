@@ -1,16 +1,14 @@
 package com.yusufziyrek.blogApp.content.dto.responses;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class GetByIdPostResponse {
 
 	private Long id;
@@ -19,6 +17,6 @@ public class GetByIdPostResponse {
 	private String text;
 	private int commentCount;
 	private int likeCount;;
-	private LocalDateTime createdDate;
+	private Date createdDate;
 
 }

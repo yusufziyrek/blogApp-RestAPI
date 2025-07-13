@@ -23,19 +23,16 @@ import com.yusufziyrek.blogApp.shared.dto.PageResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Validated
 @RequiredArgsConstructor
-@Slf4j
 public class PostsController implements IPostsController {
 
 	private final IPostService postService;
 
 	@Override
 	public ResponseEntity<ApiResponse<PageResponse<GetAllPostsResponse>>> getAll(Pageable pageable) {
-		log.debug("Getting all posts with pagination: {}", pageable);
 		PageResponse<GetAllPostsResponse> posts = postService.getAll(pageable);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Posts retrieved successfully", posts));
 	}
@@ -43,7 +40,6 @@ public class PostsController implements IPostsController {
 	@Override
 	public ResponseEntity<ApiResponse<PageResponse<GetAllPostsResponse>>> getAllForUser(Pageable pageable,
 			@AuthenticationPrincipal User user) {
-		log.debug("Getting posts for user: {} with pagination: {}", user.getUsername(), pageable);
 		PageResponse<GetAllPostsResponse> posts = postService.getAllForUser(pageable, user.getId());
 		return ResponseEntity.ok(new ApiResponse<>(true, "Posts retrieved successfully", posts));
 	}
@@ -51,7 +47,6 @@ public class PostsController implements IPostsController {
 	@Override
 	public ResponseEntity<ApiResponse<GetByIdPostResponse>> getById(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long id) {
-		log.debug("Getting post by id: {}", id);
 		GetByIdPostResponse post = postService.getById(id);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Post retrieved successfully", post));
 	}
@@ -59,9 +54,7 @@ public class PostsController implements IPostsController {
 	@Override
 	public ResponseEntity<ApiResponse<Post>> createPost(@RequestBody @Valid CreatePostRequest createPostRequest,
 			@AuthenticationPrincipal User user) {
-		log.info("Creating new post for user: {}", user.getUsername());
 		Post createdPost = postService.createPost(createPostRequest, user);
-		log.info("Post created successfully with id: {}", createdPost.getId());
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new ApiResponse<>(true, "Post created successfully", createdPost));
 	}
@@ -70,9 +63,7 @@ public class PostsController implements IPostsController {
 	public ResponseEntity<ApiResponse<Post>> update(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long id,
 			@RequestBody @Valid UpdatePostRequest updatePostRequest, @AuthenticationPrincipal User user) {
-		log.info("Updating post with id: {} for user: {}", id, user.getUsername());
 		Post updatedPost = postService.update(id, updatePostRequest, user);
-		log.info("Post updated successfully with id: {}", updatedPost.getId());
 		return ResponseEntity.ok(new ApiResponse<>(true, "Post updated successfully", updatedPost));
 	}
 
@@ -80,9 +71,7 @@ public class PostsController implements IPostsController {
 	public ResponseEntity<ApiResponse<Void>> delete(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long id,
 			@AuthenticationPrincipal User user) {
-		log.info("Deleting post with id: {} for user: {}", id, user.getUsername());
 		postService.delete(id, user);
-		log.info("Post deleted successfully with id: {}", id);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Post deleted successfully", null));
 	}
 }

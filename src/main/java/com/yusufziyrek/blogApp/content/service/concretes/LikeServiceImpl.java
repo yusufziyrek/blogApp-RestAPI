@@ -20,9 +20,8 @@ import com.yusufziyrek.blogApp.content.repo.ILikeRepository;
 import com.yusufziyrek.blogApp.content.repo.IPostRepository;
 import com.yusufziyrek.blogApp.content.service.abstracts.ILikeService;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
-import com.yusufziyrek.blogApp.shared.exception.CommentException;
 import com.yusufziyrek.blogApp.shared.exception.LikeException;
-import com.yusufziyrek.blogApp.shared.exception.PostException;
+import com.yusufziyrek.blogApp.shared.mapper.IModelMapperService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,111 +29,96 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LikeServiceImpl implements ILikeService {
 
-    private final ILikeRepository likeRepository;
-    private final IPostRepository postRepository;
-    private final ICommentRepository commentRepository;
-    private final LikeServiceRules serviceRules;
+	private final ILikeRepository likeRepository;
+	private final IPostRepository postRepository;
+	private final ICommentRepository commentRepository;
+	private final IModelMapperService modelMapperService;
+	private final LikeServiceRules serviceRules;
 
-    @Override
-    public List<GetAllLikesForPostResponse> getAllForPost(Long postId) {
-        return likeRepository.findByPostId(postId).stream()
-            .map(like -> GetAllLikesForPostResponse.builder()
-                .id(like.getId())
-                .userWhoLiked(like.getUser().getUsername())
-                .likedPostTitle(like.getPost().getTitle())
-                .build())
-            .collect(Collectors.toList());
-    }
+	@Override
+	public List<GetAllLikesForPostResponse> getAllForPost(Long postId) {
+	    List<Like> likes = this.likeRepository.findByPostId(postId);
+	    return likes.stream()
+	            .map(like -> {
+	                GetAllLikesForPostResponse response = this.modelMapperService.forResponse()
+	                        .map(like, GetAllLikesForPostResponse.class);
+	                response.setUserWhoLiked(like.getUser().getUsername());
+	                return response;
+	            })
+	            .collect(Collectors.toList());
+	}
 
-    @Override
-    public List<GetAllLikesForCommentResponse> getAllLikesForComment(Long commentId) {
-        return likeRepository.findByCommentId(commentId).stream()
-            .map(like -> GetAllLikesForCommentResponse.builder()
-                .id(like.getId())
-                .userWhoLiked(like.getUser().getUsername())
-                .likedCommentText(like.getComment().getText())
-                .build())
-            .collect(Collectors.toList());
-    }
+	@Override
+	public List<GetAllLikesForCommentResponse> getAllLikesForComment(Long commentId) {
+	    List<Like> likes = this.likeRepository.findByCommentId(commentId);
+	    return likes.stream()
+	            .map(like -> {
+	                GetAllLikesForCommentResponse response = this.modelMapperService.forResponse()
+	                        .map(like, GetAllLikesForCommentResponse.class);
+	                response.setUserWhoLiked(like.getUser().getUsername());
+	                return response;
+	            })
+	            .collect(Collectors.toList());
+	}
 
-    @Override
-    public GetByIdLikeResponse getById(Long id) {
-        Like like = likeRepository.findById(id)
-            .orElseThrow(() -> new LikeException("Like not found!"));
+	@Override
+	public GetByIdLikeResponse getById(Long id) {
+		Like like = this.likeRepository.findById(id).orElseThrow();
+		return this.modelMapperService.forResponse().map(like, GetByIdLikeResponse.class);
+	}
 
-        return GetByIdLikeResponse.builder()
-            .id(like.getId())
-            .username(like.getUser().getUsername())
-            .postTitle(like.getPost() != null ? like.getPost().getTitle() : null)
-            .commentId(like.getComment() != null ? like.getComment().getId() : null)
-            .build();
-    }
+	@Override
+	public Like addLikeForPost(Long postId, CreateLikeForPostRequest createLikeForPostRequest, User user) {
+		serviceRules.checkIfLikeAlreadyExistForPost(user.getId(), postId);
 
-    @Override
-    public Like addLikeForPost(Long postId, CreateLikeForPostRequest req, User user) {
-        serviceRules.checkIfLikeAlreadyExistForPost(user.getId(), postId);
+		Like like = new Like();
+		like.setUser(user);
+		like.setPost(this.postRepository.findById(postId).orElseThrow(() -> new LikeException("Post not found!")));
 
-        Post post = postRepository.findById(postId)
-            .orElseThrow(() -> new PostException("Post not found!"));
+		Post post = like.getPost();
+		post.incrementLikeCount();
+		this.postRepository.save(post);
 
-        Like like = Like.builder()
-            .user(user)
-            .post(post)
-            .build();
+		return this.likeRepository.save(like);
+	}
 
-        post.incrementLikeCount();
-        postRepository.save(post);
+	@Override
+	public Like addLikeForComment(Long commentId, CreateLikeForCommentRequest createLikeForCommentRequest, User user) {
+		serviceRules.checkIfLikeAlreadyExistForComment(user.getId(), commentId);
 
-        return likeRepository.save(like);
-    }
+		Like like = new Like();
+		like.setUser(user);
+		like.setComment(
+				this.commentRepository.findById(commentId).orElseThrow(() -> new LikeException("Comment not found!")));
 
-    @Override
-    public Like addLikeForComment(Long commentId, CreateLikeForCommentRequest req, User user) {
-        serviceRules.checkIfLikeAlreadyExistForComment(user.getId(), commentId);
+		Comment comment = like.getComment();
+		comment.incrementLikeCount();
+		this.commentRepository.save(comment);
 
-        Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new CommentException("Comment not found!"));
+		return this.likeRepository.save(like);
+	}
 
-        Like like = Like.builder()
-            .user(user)
-            .comment(comment)
-            .build();
+	@Override
+	public void dislikeForPost(Long likeId, User user) {
+		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException("Like not found!"));
+		if (!like.getUser().getId().equals(user.getId())) {
+			throw new AccessDeniedException("You are not allowed to remove this like.");
+		}
+		Post post = like.getPost();
+		post.decrementLikeCount();
+		this.postRepository.save(post);
+		this.likeRepository.deleteById(likeId);
+	}
 
-        comment.incrementLikeCount();
-        commentRepository.save(comment);
-
-        return likeRepository.save(like);
-    }
-
-    @Override
-    public void dislikeForPost(Long likeId, User user) {
-        Like like = likeRepository.findById(likeId)
-            .orElseThrow(() -> new LikeException("Like not found!"));
-
-        if (!like.getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("You are not allowed to remove this like.");
-        }
-
-        Post post = like.getPost();
-        post.decrementLikeCount();
-        postRepository.save(post);
-
-        likeRepository.deleteById(likeId);
-    }
-
-    @Override
-    public void dislikeForComment(Long likeId, User user) {
-        Like like = likeRepository.findById(likeId)
-            .orElseThrow(() -> new LikeException("Like not found!"));
-
-        if (!like.getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("You are not allowed to remove this like.");
-        }
-
-        Comment comment = like.getComment();
-        comment.decrementLikeCount();
-        commentRepository.save(comment);
-
-        likeRepository.deleteById(likeId);
-    }
+	@Override
+	public void dislikeForComment(Long likeId, User user) {
+		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException("Like not found!"));
+		if (!like.getUser().getId().equals(user.getId())) {
+			throw new AccessDeniedException("You are not allowed to remove this like.");
+		}
+		Comment comment = like.getComment();
+		comment.decrementLikeCount();
+		this.commentRepository.save(comment);
+		this.likeRepository.deleteById(likeId);
+	}
 }
