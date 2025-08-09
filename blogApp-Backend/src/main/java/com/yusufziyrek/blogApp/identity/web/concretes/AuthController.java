@@ -48,8 +48,10 @@ public class AuthController implements IAuthController {
 
 	@Override
 	public ResponseEntity<ApiResponse<String>> verifyAccount(@RequestParam("token") String token) {
-		String result = authService.verifyAccount(token);
-		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.ACCOUNT_VERIFICATION_SUCCESSFUL, result));
+		// Email doğrulama endpoint'ini geçici olarak devre dışı bırakıyoruz
+		// String result = authService.verifyAccount(token);
+		// return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.ACCOUNT_VERIFICATION_SUCCESSFUL, result));
+		return ResponseEntity.ok(new ApiResponse<>(true, "Email verification is temporarily disabled", "Account verification is not required for now."));
 	}
 
 	@Override

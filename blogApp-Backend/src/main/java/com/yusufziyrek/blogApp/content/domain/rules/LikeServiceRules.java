@@ -25,4 +25,10 @@ public class LikeServiceRules {
 			throw new LikeException(ErrorMessages.LIKE_ALREADY_EXISTS_FOR_COMMENT);
 		}
 	}
+
+	public void validateLikeData(Long postId, Long commentId) {
+		if ((postId == null && commentId == null) || (postId != null && commentId != null)) {
+			throw new LikeException("Like must be associated with either a post or a comment, not both or neither");
+		}
+	}
 }

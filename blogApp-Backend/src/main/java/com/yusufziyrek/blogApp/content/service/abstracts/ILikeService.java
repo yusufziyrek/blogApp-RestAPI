@@ -22,7 +22,5 @@ public interface ILikeService {
 
 	Like addLikeForComment(Long commentId, CreateLikeForCommentRequest createLikeForCommentRequest, User user);
 
-	void dislikeForPost(Long likeId, User user);
-
-	void dislikeForComment(Long likeId, User user);
+	void unlikePost(Long postId, User user);
 }

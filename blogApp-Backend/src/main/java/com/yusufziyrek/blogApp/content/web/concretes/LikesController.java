@@ -74,20 +74,11 @@ public class LikesController implements ILikesController {
 	}
 
 	@Override
-	public ResponseEntity<ApiResponse<Void>> dislikeForPost(
-			@PathVariable @Positive(message = "Like ID must be a positive number") Long likeId,
+	public ResponseEntity<ApiResponse<Void>> unlikePost(
+			@PathVariable @Positive(message = "Post ID must be a positive number") Long postId,
 			@AuthenticationPrincipal User user) {
-		likeService.dislikeForPost(likeId, user);
+		likeService.unlikePost(postId, user);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT)
 				.body(new ApiResponse<>(true, ResponseMessages.LIKE_REMOVED_FROM_POST_SUCCESSFULLY, null));
-	}
-
-	@Override
-	public ResponseEntity<ApiResponse<Void>> dislikeForComment(
-			@PathVariable @Positive(message = "Like ID must be a positive number") Long likeId,
-			@AuthenticationPrincipal User user) {
-		likeService.dislikeForComment(likeId, user);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT)
-				.body(new ApiResponse<>(true, ResponseMessages.LIKE_REMOVED_FROM_COMMENT_SUCCESSFULLY, null));
 	}
 }

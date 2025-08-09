@@ -26,6 +26,7 @@ public class PostMapper {
         response.setCommentCount(post.getCommentCount());
         response.setLikeCount(post.getLikeCount());
         response.setAuthorUser(post.getUser() != null ? post.getUser().getUsername() : null);
+        response.setAuthorId(post.getUser() != null ? post.getUser().getId() : null);
         return response;
     }
 
@@ -41,6 +42,7 @@ public class PostMapper {
         response.setCommentCount(post.getCommentCount());
         response.setLikeCount(post.getLikeCount());
         response.setAuthorUser(post.getUser() != null ? post.getUser().getUsername() : null);
+        response.setAuthorId(post.getUser() != null ? post.getUser().getId() : null);
         return response;
     }
 

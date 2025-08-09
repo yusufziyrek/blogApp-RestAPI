@@ -1,7 +1,6 @@
 package com.yusufziyrek.blogApp.identity.service.concretes;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.yusufziyrek.blogApp.identity.domain.models.RefreshToken;
 import com.yusufziyrek.blogApp.identity.domain.models.Role;
 import com.yusufziyrek.blogApp.identity.domain.models.User;
-import com.yusufziyrek.blogApp.identity.domain.models.VerificationToken;
 import com.yusufziyrek.blogApp.identity.dto.requests.LoginRequest;
 import com.yusufziyrek.blogApp.identity.dto.requests.RegisterRequest;
 import com.yusufziyrek.blogApp.identity.dto.responses.AuthResponse;
@@ -51,30 +49,33 @@ public class AuthServiceImpl implements IAuthService {
         user.setAge(request.getAge());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
-        user.setEnabled(false);
+        // Email aktivasyonunu geçici olarak devre dışı bırakıyoruz
+        user.setEnabled(true);
         userRepository.save(user);
 
-        String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken();
-        verificationToken.setToken(token);
-        verificationToken.setUser(user);
-        verificationToken.setExpiryDate(LocalDateTime.now().plusDays(1));
-        verificationTokenRepository.save(verificationToken);
+        // Email doğrulama token'ı oluşturmayı geçici olarak devre dışı bırakıyoruz
+        // String token = UUID.randomUUID().toString();
+        // VerificationToken verificationToken = new VerificationToken();
+        // verificationToken.setToken(token);
+        // verificationToken.setUser(user);
+        // verificationToken.setExpiryDate(LocalDateTime.now().plusDays(1));
+        // verificationTokenRepository.save(verificationToken);
 
-        return "User registered successfully! Please verify your email to activate your account.";
+        return "User registered successfully! You can now log in.";
     }
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmailOrUsername(request.getUsernameOrEmail(), request.getUsernameOrEmail())
                 .orElseThrow(() -> new AuthException(String.format(ErrorMessages.USER_NOT_FOUND_BY_EMAIL, request.getUsernameOrEmail())));
-        if (!user.isEnabled()) {
-            throw new AuthException(ErrorMessages.USER_ACCOUNT_NOT_VERIFIED);
-        }
+        // Email doğrulama kontrolünü geçici olarak devre dışı bırakıyoruz
+        // if (!user.isEnabled()) {
+        //     throw new AuthException(ErrorMessages.USER_ACCOUNT_NOT_VERIFIED);
+        // }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsernameOrEmail(), request.getPassword()));
         String accessToken = jwtUtil.generateToken(user.getEmail(), user.getId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-        return new AuthResponse(accessToken, refreshToken.getToken(), "Login successful!");
+        return new AuthResponse(accessToken, refreshToken.getToken(), "Login successful!", user);
     }
 
     public String verifyAccount(String token) {

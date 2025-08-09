@@ -46,6 +46,13 @@ public class PostsController implements IPostsController {
 	}
 
 	@Override
+	public ResponseEntity<ApiResponse<PageResponse<GetAllPostsResponse>>> getAllByUserId(Pageable pageable,
+			@PathVariable @Positive(message = "User ID must be a positive number") Long userId) {
+		PageResponse<GetAllPostsResponse> posts = postService.getAllForUser(pageable, userId);
+		return ResponseEntity.ok(new ApiResponse<>(true, ResponseMessages.POSTS_RETRIEVED_SUCCESSFULLY, posts));
+	}
+
+	@Override
 	public ResponseEntity<ApiResponse<GetByIdPostResponse>> getById(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long id) {
 		GetByIdPostResponse post = postService.getById(id);

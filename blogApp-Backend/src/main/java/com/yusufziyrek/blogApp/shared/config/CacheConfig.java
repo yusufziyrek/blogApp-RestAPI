@@ -44,7 +44,7 @@ public class CacheConfig {
         
         // Cache isimlerini tanımla
         cacheManager.setCacheNames(java.util.Arrays.asList(
-            "userDetails", "allUsers", "allPosts", "postDetails", "userPostTitles",
+            "userDetails", "allUsers", "allPosts", "postDetails", "userPostTitles", "userPosts",
             "commentsForPost", "commentsForUser", "commentDetails", "likesForPost", "likesForComment"
         ));
         

@@ -58,22 +58,29 @@ public class LikeServiceImpl implements ILikeService {
 
 	@Override
 	public Like addLikeForPost(Long postId, CreateLikeForPostRequest createLikeForPostRequest, User user) {
-		serviceRules.checkIfLikeAlreadyExistForPost(user.getId(), postId);
+		// Check if user has already liked this post
+		if (likeRepository.existsByUserIdAndPostId(user.getId(), postId)) {
+			throw new LikeException("You have already liked this post");
+		}
+		
+		serviceRules.validateLikeData(postId, null);
 
 		Like like = new Like();
 		like.setUser(user);
 		like.setPost(this.postRepository.findById(postId).orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, postId))));
 
-		Post post = like.getPost();
-		post.incrementLikeCount();
-		this.postRepository.save(post);
-
-		return this.likeRepository.save(like);
+		Like savedLike = this.likeRepository.save(like);
+		
+		// Recalculate like count to ensure consistency
+		recalculateLikeCount(postId);
+		
+		return savedLike;
 	}
 
 	@Override
 	public Like addLikeForComment(Long commentId, CreateLikeForCommentRequest createLikeForCommentRequest, User user) {
 		serviceRules.checkIfLikeAlreadyExistForComment(user.getId(), commentId);
+		serviceRules.validateLikeData(null, commentId);
 
 		Like like = new Like();
 		like.setUser(user);
@@ -88,26 +95,29 @@ public class LikeServiceImpl implements ILikeService {
 	}
 
 	@Override
-	public void dislikeForPost(Long likeId, User user) {
-		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException(String.format(ErrorMessages.LIKE_NOT_FOUND_BY_ID, likeId)));
-		if (!like.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException(ErrorMessages.LIKE_ACCESS_DENIED_DELETE);
+	public void unlikePost(Long postId, User user) {
+		// Check if user has liked this post
+		if (!likeRepository.existsByUserIdAndPostId(user.getId(), postId)) {
+			throw new LikeException("User has not liked this post");
 		}
-		Post post = like.getPost();
-		post.decrementLikeCount();
-		this.postRepository.save(post);
-		this.likeRepository.deleteById(likeId);
+		
+		Like like = this.likeRepository.findByUserIdAndPostId(user.getId(), postId)
+				.orElseThrow(() -> new LikeException("User has not liked this post"));
+		
+		// Delete the like
+		this.likeRepository.deleteById(like.getId());
+		
+		// Recalculate like count to ensure consistency
+		recalculateLikeCount(postId);
 	}
 
-	@Override
-	public void dislikeForComment(Long likeId, User user) {
-		Like like = this.likeRepository.findById(likeId).orElseThrow(() -> new LikeException(String.format(ErrorMessages.LIKE_NOT_FOUND_BY_ID, likeId)));
-		if (!like.getUser().getId().equals(user.getId())) {
-			throw new AccessDeniedException(ErrorMessages.LIKE_ACCESS_DENIED_DELETE);
-		}
-		Comment comment = like.getComment();
-		comment.decrementLikeCount();
-		this.commentRepository.save(comment);
-		this.likeRepository.deleteById(likeId);
+	// Helper method to recalculate like count for a post
+	private void recalculateLikeCount(Long postId) {
+		Post post = this.postRepository.findById(postId)
+				.orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, postId)));
+		
+		long actualLikeCount = this.likeRepository.findByPostId(postId).size();
+		post.setLikeCount((int) actualLikeCount);
+		this.postRepository.save(post);
 	}
 }

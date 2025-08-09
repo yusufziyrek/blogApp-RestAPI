@@ -21,5 +21,6 @@ public class GetByIdPostResponse {
 	private int commentCount;
 	private int likeCount;
 	private String authorUser;
+	private Long authorId;
 
 }

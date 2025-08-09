@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,13 +33,18 @@ public class Like {
 	private User user;
 
 	@ManyToOne
-	@JoinColumn(name = "post_id")
+	@JoinColumn(name = "post_id", nullable = true)
 	@JsonIgnore
 	private Post post;
 
 	@ManyToOne
-	@JoinColumn(name = "comment_id")
+	@JoinColumn(name = "comment_id", nullable = true)
 	@JsonIgnore
 	private Comment comment;
+
+	@AssertTrue(message = "Either post or comment must be specified")
+	public boolean isPostOrCommentSpecified() {
+		return (post != null && comment == null) || (post == null && comment != null);
+	}
 
 }

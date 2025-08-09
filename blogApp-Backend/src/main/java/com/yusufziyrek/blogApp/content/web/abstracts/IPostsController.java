@@ -29,6 +29,10 @@ public interface IPostsController {
 	ResponseEntity<ApiResponse<PageResponse<GetAllPostsResponse>>> getAllForUser(Pageable pageable,
 			@AuthenticationPrincipal User user);
 
+	@GetMapping("/user/{userId}")
+	ResponseEntity<ApiResponse<PageResponse<GetAllPostsResponse>>> getAllByUserId(Pageable pageable,
+			@PathVariable @Positive(message = "User ID must be a positive number") Long userId);
+
 	@GetMapping("/{id}")
 	ResponseEntity<ApiResponse<GetByIdPostResponse>> getById(
 			@PathVariable @Positive(message = "Post ID must be a positive number") Long id);

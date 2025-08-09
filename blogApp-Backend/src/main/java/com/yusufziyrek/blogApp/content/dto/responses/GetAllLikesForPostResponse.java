@@ -13,5 +13,6 @@ public class GetAllLikesForPostResponse {
 
 	private Long id;
 	private String username;
+	private Long userId;
 
 }

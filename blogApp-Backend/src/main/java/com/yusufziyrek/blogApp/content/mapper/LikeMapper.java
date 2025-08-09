@@ -27,6 +27,7 @@ public class LikeMapper {
         GetAllLikesForPostResponse response = new GetAllLikesForPostResponse();
         response.setId(like.getId());
         response.setUsername(like.getUser() != null ? like.getUser().getUsername() : null);
+        response.setUserId(like.getUser() != null ? like.getUser().getId() : null);
         return response;
     }
 

@@ -37,7 +37,9 @@ public class SearchServiceImpl implements ISearchService {
                         post.getUpdatedDate(),
                         post.getCommentCount(),
                         post.getLikeCount(),
-                        post.getUser().getUsername()))
+                        post.getUser().getUsername(),
+                        post.getUser().getId()
+                    ))
                     .collect(Collectors.toList());
             result.setBlogPosts(postDTOs);
         }

@@ -46,13 +46,8 @@ public interface ILikesController {
 			@RequestBody @Valid CreateLikeForCommentRequest createLikeForCommentRequest,
 			@AuthenticationPrincipal User user);
 
-	@DeleteMapping("/post/{likeId}")
-	ResponseEntity<ApiResponse<Void>> dislikeForPost(
-			@PathVariable @Positive(message = "Like ID must be a positive number") Long likeId,
-			@AuthenticationPrincipal User user);
-
-	@DeleteMapping("/comment/{likeId}")
-	ResponseEntity<ApiResponse<Void>> dislikeForComment(
-			@PathVariable @Positive(message = "Like ID must be a positive number") Long likeId,
+	@DeleteMapping("/post/{postId}/unlike")
+	ResponseEntity<ApiResponse<Void>> unlikePost(
+			@PathVariable @Positive(message = "Post ID must be a positive number") Long postId,
 			@AuthenticationPrincipal User user);
 }

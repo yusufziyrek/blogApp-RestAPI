@@ -1,5 +1,6 @@
 package com.yusufziyrek.blogApp.identity.dto.responses;
 
+import com.yusufziyrek.blogApp.identity.domain.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,4 +12,5 @@ public class AuthResponse {
 	private String accessToken;
 	private String refreshToken;
 	private String message;
+	private User user;
 }
