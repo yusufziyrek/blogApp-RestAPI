@@ -24,9 +24,11 @@ import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.exception.UserException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements IUserService {
 
 	private final IUserRepository userRepository;
@@ -36,47 +38,61 @@ public class UserServiceImpl implements IUserService {
 	@Override
 	@Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
 	public PageResponse<GetAllUsersResponse> getAll(Pageable pageable) {
+		log.info("Getting all users - page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
 		Page<User> users = this.userRepository.findAll(pageable);
+		log.info("Found {} users", users.getTotalElements());
 		return toPageResponse(users);
 	}
 
 	@Override
 	@Cacheable(value = "userDetails", key = "#id")
 	public GetByIdUserResponse getById(Long id) {
+		log.info("Getting user by ID: {}", id);
 		User user = this.userRepository.findById(id)
 				.orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, id)));
+		log.info("Successfully found user: {}", user.getUsername());
 		return this.userMapper.toGetByIdResponse(user);
 	}
 
 	public GetByIdUserResponse getByUserName(String username) {
+		log.info("Getting user by username: {}", username);
 		User user = this.userRepository.findByUsername(username)
 				.orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_USERNAME, username)));
+		log.info("Successfully found user by username: {}", username);
 		return this.userMapper.toGetByIdResponse(user);
 	}
 
 	@Override
 	@CacheEvict(value = { "userDetails", "allUsers" }, allEntries = true)
 	public User add(RegisterRequest registerUserRequest) {
+		log.info("Adding new user with username: {}", registerUserRequest.getUsername());
 		this.serviceRules.checkIfUserNameExists(registerUserRequest.getUsername());
 		User user = this.userMapper.toUser(registerUserRequest);
-		return this.userRepository.save(user);
+		User savedUser = this.userRepository.save(user);
+		log.info("Successfully added user with ID: {}", savedUser.getId());
+		return savedUser;
 	}
 
 	@Override
 	@Caching(evict = { @CacheEvict(value = "userDetails", key = "#id"),
 			@CacheEvict(value = "allUsers", allEntries = true) })
 	public User update(Long id, UpdateUserRequest updateUserRequest) {
+		log.info("Updating user with ID: {}", id);
 		User user = this.userRepository.findById(id)
 				.orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, id)));
 		this.userMapper.updateUserFromRequest(user, updateUserRequest);
-		return this.userRepository.save(user);
+		User updatedUser = this.userRepository.save(user);
+		log.info("Successfully updated user with ID: {}", id);
+		return updatedUser;
 	}
 
 	@Override
 	@Caching(evict = { @CacheEvict(value = "userDetails", key = "#id"),
 			@CacheEvict(value = "allUsers", allEntries = true) })
 	public void delete(Long id) {
+		log.info("Deleting user with ID: {}", id);
 		this.userRepository.deleteById(id);
+		log.info("Successfully deleted user with ID: {}", id);
 	}
 
 	private PageResponse<GetAllUsersResponse> toPageResponse(Page<User> source) {

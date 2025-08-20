@@ -35,6 +35,14 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 
 ---
 
+### **Logging (SLF4J)**
+- The project uses SLF4J with Logback (provided by Spring Boot) for application-wide logging. Many service classes include Lombok's `@Slf4j` annotation.
+- Adjust log levels in `application.properties`. Minimal examples:
+  - `logging.level.root=INFO`
+  - `logging.level.com.yusufziyrek=DEBUG`
+
+---
+
 ### **Architecture:**
 - **Modular Monolith:**  
   The application follows a simple modular monolith architecture, organizing code into distinct modules within a single deployment unit to maintain modularity and ease of development.

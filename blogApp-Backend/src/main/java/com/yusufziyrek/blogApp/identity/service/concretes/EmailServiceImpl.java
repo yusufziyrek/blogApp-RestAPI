@@ -1,82 +1,18 @@
 package com.yusufziyrek.blogApp.identity.service.concretes;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.yusufziyrek.blogApp.identity.service.abstracts.IEmailService;
 
-@Service
-@RequiredArgsConstructor
-public class EmailServiceImpl implements IEmailService{
+import lombok.extern.slf4j.Slf4j;
 
-	private final JavaMailSender mailSender;
+@Service
+@Slf4j
+public class EmailServiceImpl implements IEmailService {
 
 	public void sendVerificationEmail(String toEmail, String token) {
-		try {
-			MimeMessage mimeMessage = mailSender.createMimeMessage();
-
-			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
-			helper.setTo(toEmail);
-			helper.setSubject("Hesap Doğrulama");
-
-			String verificationLink = "http://localhost:8080/api/auth/verify?token=" + token;
-
-			String htmlContent = """
-					<html>
-					<head>
-					  <meta charset="UTF-8">
-					  <title>Hesap Doğrulama</title>
-					  <style>
-					    .container {
-					        font-family: Arial, sans-serif;
-					        margin: 20px;
-					    }
-					    .title {
-					        font-size: 18px;
-					        color: #4CAF50;
-					        font-weight: bold;
-					    }
-					    .content {
-					        margin-top: 15px;
-					        line-height: 1.6;
-					    }
-					    .button {
-					        display: inline-block;
-					        margin-top: 20px;
-					        padding: 10px 15px;
-					        text-decoration: none;
-					        background-color: #4CAF50;
-					        color: #fff;
-					        border-radius: 4px;
-					    }
-					  </style>
-					</head>
-					<body>
-					  <div class="container">
-					    <div class="title">Hesabınızı Doğrulayın</div>
-					    <div class="content">
-					      <p>Merhaba,</p>
-					      <p>Hesabınızı aktif etmek için aşağıdaki butona tıklayabilirsiniz:</p>
-					      <a class="button" href="%s">Hesabımı Doğrula</a>
-					      <p>Eğer linke tıklayamıyorsanız, aşağıdaki adresi tarayıcınıza kopyalayın:</p>
-					      <p>%s</p>
-					    </div>
-					  </div>
-					</body>
-					</html>
-					""".formatted(verificationLink, verificationLink);
-
-			helper.setText(htmlContent, true);
-
-			mailSender.send(mimeMessage);
-
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		}
+		// Email işlemleri geçici olarak askıya alındı
+		log.info("Email gönderme işlemi devre dışı - Email: {} için doğrulama kodu oluşturuldu", toEmail);
+		log.info("Doğrulama linki: http://localhost:8080/api/v1/auth/verify?token={}", token);
 	}
 }
