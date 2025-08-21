@@ -16,6 +16,7 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>24</java.version>
+		<lombok.version>1.18.38</lombok.version>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
 	</properties>
 	<dependencies>
@@ -51,7 +52,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -98,6 +100,22 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.14.0</version>
+				<configuration>
+					<release>${java.version}</release>
+					<fork>true</fork>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
