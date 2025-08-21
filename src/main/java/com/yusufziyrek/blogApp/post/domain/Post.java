@@ -8,6 +8,11 @@ import com.yusufziyrek.blogApp.user.domain.User;
 import com.yusufziyrek.blogApp.comment.domain.Comment;
 import com.yusufziyrek.blogApp.like.domain.Like;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,40 +22,51 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
+import jakarta.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "posts")
+@Table(
+	name = "posts",
+	indexes = {
+		@Index(name = "idx_posts_user_id", columnList = "user_id"),
+		@Index(name = "idx_posts_created_date", columnList = "createdDate")
+	}
+)
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@DynamicUpdate
+@BatchSize(size = 50)
 public class Post {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(length = 200)
 	private String title;
 
 	@Column(columnDefinition = "TEXT")
 	private String text;
 
+	@CreationTimestamp
 	private LocalDateTime createdDate;
 
+	@UpdateTimestamp
 	private LocalDateTime updatedDate;
 
 	private int commentCount = 0;
 
 	private int likeCount = 0;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	@JsonIgnore
 	private User user;
@@ -63,18 +79,6 @@ public class Post {
 	@JsonIgnore
 	private List<Like> likes;
 
-	@PrePersist
-	protected void onCreate() {
-		if (createdDate == null) {
-			createdDate = LocalDateTime.now();
-		}
-		updatedDate = LocalDateTime.now();
-	}
-
-	@PreUpdate
-	protected void onUpdate() {
-		updatedDate = LocalDateTime.now();
-	}
 
 	public void incrementCommentCount() {
 		this.commentCount++;

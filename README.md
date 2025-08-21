@@ -12,8 +12,10 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
   Create, read, update, and delete blog posts.
 - **Comments & Likes:**  
   Users can comment on and like posts.
-- **JWT Authentication & Security:**  
-  Secured endpoints with JWT-based authentication and role-based access control.
+- **JWT Authentication & Refresh Token Security:**  
+  Secured endpoints with JWT-based authentication, refresh token rotation, device tracking, and role-based access control.
+- **Advanced Token Management:**  
+  Persistent refresh tokens with automatic cleanup, session limits, and secure logout functionality.
 - **Email Verification:**  
   New users must verify their email addresses to activate their accounts. A verification link is sent upon registration.
 - **Caching with Caffeine:**  
@@ -22,7 +24,7 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 ---
 
 ### **2. Tech Stack:**
-- **Java 21 & Spring Boot:**  
+- **Java 24 & Spring Boot:**  
   API development, dependency injection, and MVC architecture.
 - **Spring Data JPA:**  
   Simplifies database interactions.
@@ -47,7 +49,7 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 
 The project follows Clean Architecture with DDD tactics in a Modular Monolith setup:
 
-- Domain-centric modules: `user/`, `post/`, `comment/`, `like/` (+ `shared/` for cross-cutting concerns)
+- Domain-centric modules: `auth/`, `user/`, `post/`, `comment/`, `like/` (+ `shared/` for cross-cutting concerns)
 - Layers per module:
   - `domain/` → Entities and domain logic
   - `application/`
@@ -157,17 +159,26 @@ Cross-cutting concerns live under `shared/` (Security/JWT, CORS/Cache config, ex
 
 ---
 
-### **5. JWT Authentication & Security Updates**
+### **5. JWT Authentication & Refresh Token Security**
 
 - **JWT-Based Authentication:**  
-  Each request to a protected endpoint requires a valid JWT token. Users receive a token upon successful login, which must be included in the `Authorization` header:
+  Each request to a protected endpoint requires a valid JWT token. Users receive both access and refresh tokens upon successful login/registration:
   ```http
-  Authorization: Bearer <JWT_TOKEN>
+  Authorization: Bearer <ACCESS_TOKEN>
   ```
-- **Spring Security Integration:**  
-  Uses role-based permissions to control access.
-- **Token Expiration Handling:**  
-  Validates token expiration to ensure secure session management.
+
+- **Refresh Token Mechanism:**  
+  - **Persistent Storage:** Refresh tokens are stored in database with expiration tracking
+  - **Device Tracking:** Each refresh token includes device info and IP address for security
+  - **Token Rotation:** New refresh token generated on each refresh request
+  - **Automatic Cleanup:** Expired tokens are automatically cleaned up via scheduled tasks
+  - **Session Limits:** Maximum 5 active refresh tokens per user (configurable)
+
+- **Security Features:**  
+  - **Token Revocation:** Logout revokes refresh tokens immediately
+  - **Role-Based Access:** Spring Security integration with method-level permissions
+  - **Expiration Handling:** Separate expiration times for access (1h) and refresh tokens (30 days)
+  - **Device Management:** Track and limit active sessions per user
 - **Email Verification Flow:**  
   1. **User Registration:** User registers via `POST /api/v1/auth/register`.  
   2. **Verification Link:** An email is sent with a verification link.  
@@ -208,9 +219,14 @@ To improve performance and reduce database load, BlogApp-RestAPI integrates **Ca
 4. **Configure JWT, Email, and Cache Settings:**  
    In your `application.properties`, set up the following:
    ```properties
-   # JWT Secret Key
+   # JWT Configuration
    jwt.secret-key=YourSecureSecretKey
-   jwt.expiration-time=3600000  # Example: 1 hour in milliseconds
+   jwt.expiration-time=3600000  # Access token: 1 hour
+   jwt.refresh-token.expiration-ms=86400000  # Refresh token: 24 hours
+
+   # Refresh Token Settings
+   jwt.refresh.max-tokens-per-user=5  # Max active sessions per user
+   jwt.refresh.cleanup.enabled=true  # Auto cleanup expired tokens
 
    # Email Configuration (using Gmail SMTP with TLS)
    spring.mail.host=smtp.gmail.com
@@ -224,9 +240,25 @@ To improve performance and reduce database load, BlogApp-RestAPI integrates **Ca
 5. **Test Endpoints:**  
    - **Authentication:**  
      ```bash
-     curl -X POST http://localhost:8080/auth/login \
+     # Register new user
+     curl -X POST http://localhost:8080/api/v1/auth/register \
           -H "Content-Type: application/json" \
-          -d '{"username":"user1","password":"password"}'
+          -d '{"firstname":"John","lastname":"Doe","username":"johndoe","email":"john@example.com","password":"password123","department":"IT","age":25}'
+
+     # Login
+     curl -X POST http://localhost:8080/api/v1/auth/login \
+          -H "Content-Type: application/json" \
+          -d '{"email":"john@example.com","password":"password123"}'
+
+     # Refresh token
+     curl -X POST http://localhost:8080/api/v1/auth/refresh \
+          -H "Content-Type: application/json" \
+          -d '{"refreshToken":"your_refresh_token_here"}'
+
+     # Logout
+     curl -X POST http://localhost:8080/api/v1/auth/logout \
+          -H "Content-Type: application/json" \
+          -d '{"refreshToken":"your_refresh_token_here"}'
      ```
    - **Email Verification:**  
      Check your inbox for a verification link and open it in a browser (e.g., `GET /auth/verify?token=<TOKEN>`).
@@ -238,6 +270,8 @@ To improve performance and reduce database load, BlogApp-RestAPI integrates **Ca
 ### **8. Future Improvements:**
 - **OAuth2 Support:** Enable social login via Google and GitHub.
 - **2FA (Two-Factor Authentication):** Enhance security with OTP-based login.
+- **Device Management:** Web interface for users to manage their active sessions.
+- **Advanced Token Analytics:** Track token usage patterns and suspicious activities.
 - **Admin Panel:** Provide a web interface for managing users, posts, and comments.
 - **Advanced Cache Strategies:** Explore more sophisticated caching strategies and cache eviction policies as the project scales.
 
@@ -277,3 +311,27 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
   ![image](https://github.com/user-attachments/assets/384e82b4-c77a-470b-9b35-6b227b0f89ca)
 
 ---
+
+## **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### **Contributing**
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### **Author**
+
+- **Yusuf Ziyrek** - [GitHub Profile](https://github.com/yusufziyrek)
+
+### **Acknowledgments**
+
+- Spring Boot team for the excellent framework
+- Open source community for the tools and libraries used in this project
+
+---
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Java](https://img.shields.io/badge/Java-24-orange.svg)](https://openjdk.java.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)]()

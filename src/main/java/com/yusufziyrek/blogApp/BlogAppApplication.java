@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Import;
 
+import com.yusufziyrek.blogApp.auth.infrastructure.config.AuthModuleConfiguration;
 import com.yusufziyrek.blogApp.post.infrastructure.config.PostModuleConfiguration;
 import com.yusufziyrek.blogApp.comment.infrastructure.config.CommentModuleConfiguration;
 import com.yusufziyrek.blogApp.user.infrastructure.config.UserModuleConfiguration;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @EnableCaching
 @Slf4j
 @Import({
+    AuthModuleConfiguration.class,
     PostModuleConfiguration.class,
     CommentModuleConfiguration.class,
     UserModuleConfiguration.class,
@@ -25,7 +27,7 @@ public class BlogAppApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BlogAppApplication.class, args);
-		log.info("BlogAppApplication started successfully with Clean Architecture - Domain-based Modular Monolith structure.");
+		log.info("BlogAppApplication started successfully..");
 	}
 
 }

@@ -6,12 +6,12 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface UserRepository {
-    User save(User user);
+    Page<User> findAll(Pageable pageable);
     Optional<User> findById(Long id);
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
+    User save(User user);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-    Page<User> findAll(Pageable pageable);
     void deleteById(Long id);
 }

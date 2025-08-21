@@ -13,7 +13,36 @@
 	<artifactId>blogApp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>blogApp</name>
-	<description>Demo project for Spring Boot</description>
+	<description>BlogApp-RestAPI: A comprehensive RESTful API for blog management with JWT authentication, refresh tokens, and advanced security features</description>
+	
+	<url>https://github.com/yusufziyrek/blogApp-RestAPI</url>
+	
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	
+	<developers>
+		<developer>
+			<id>yusufziyrek</id>
+			<name>Yusuf Ziyrek</name>
+			<email>yusuf.ziyrek@example.com</email>
+			<url>https://github.com/yusufziyrek</url>
+			<roles>
+				<role>Lead Developer</role>
+			</roles>
+		</developer>
+	</developers>
+	
+	<scm>
+		<connection>scm:git:git://github.com/yusufziyrek/blogApp-RestAPI.git</connection>
+		<developerConnection>scm:git:ssh://github.com:yusufziyrek/blogApp-RestAPI.git</developerConnection>
+		<url>https://github.com/yusufziyrek/blogApp-RestAPI/tree/main</url>
+	</scm>
+	
 	<properties>
 		<java.version>24</java.version>
 		<lombok.version>1.18.38</lombok.version>

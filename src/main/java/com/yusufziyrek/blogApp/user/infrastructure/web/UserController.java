@@ -1,9 +1,10 @@
 package com.yusufziyrek.blogApp.user.infrastructure.web;
 
 import com.yusufziyrek.blogApp.shared.dto.PageResponse;
-import com.yusufziyrek.blogApp.user.application.usecases.*;
+import com.yusufziyrek.blogApp.user.application.usecases.GetUserByIdUseCase;
+import com.yusufziyrek.blogApp.user.application.usecases.GetAllUsersUseCase;
+import com.yusufziyrek.blogApp.user.application.usecases.UpdateUserProfileUseCase;
 import com.yusufziyrek.blogApp.user.domain.User;
-import com.yusufziyrek.blogApp.user.dto.request.CreateUserRequest;
 import com.yusufziyrek.blogApp.user.dto.request.UpdateUserRequest;
 import com.yusufziyrek.blogApp.user.dto.response.UserResponse;
 import com.yusufziyrek.blogApp.user.dto.response.UserSummaryResponse;
@@ -20,29 +21,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
     
-    private final CreateUserUseCase createUserUseCase;
     private final GetUserByIdUseCase getUserByIdUseCase;
     private final GetAllUsersUseCase getAllUsersUseCase;
     private final UpdateUserProfileUseCase updateUserProfileUseCase;
-    
-    @PostMapping("/register")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
-        User user = createUserUseCase.execute(
-            request.getFirstname(),
-            request.getLastname(),
-            request.getUsername(),
-            request.getEmail(),
-            request.getPassword(),
-            request.getDepartment(),
-            request.getAge()
-        );
-        
-        return ResponseEntity.ok(mapToUserResponse(user));
-    }
     
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #user.id == #id")
