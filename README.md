@@ -24,7 +24,7 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 ---
 
 ### **2. Tech Stack:**
-- **Java 24 & Spring Boot:**  
+- **Java 21 & Spring Boot:**  
   API development, dependency injection, and MVC architecture.
 - **Spring Data JPA:**  
   Simplifies database interactions.
@@ -87,75 +87,75 @@ Cross-cutting concerns live under `shared/` (Security/JWT, CORS/Cache config, ex
 
 #### **Authentication & Security:**
 - **`POST /api/v1/auth/register`**:  
-  Registers a new user and triggers email verification.
+  Register a new user and immediately authenticate (returns access + refresh token).
 - **`POST /api/v1/auth/login`**:  
-  Authenticates a user and returns a JWT token.
-- **`GET /api/v1/auth/verify?token={token}`**:  
-  Verifies the user’s email using the provided token.
+  Authenticate with email or username + password (returns access + refresh token).
 - **`POST /api/v1/auth/refresh`**:  
-  Refreshes the JWT token.
+  Issue a new access token using a valid (non‑revoked) refresh token.
 
 #### **User Management:**
-- **`GET /api/v1/users`**(ADMIN only):  
-  Lists all users with pagination.
+- **`GET /api/v1/users`** (ADMIN):  
+  Paginated list of users.
 - **`GET /api/v1/users/me`**:  
-  Returns the current authenticated user's profile.
+  Current authenticated user profile.
 - **`PUT /api/v1/users/me`**:  
-  Updates the current authenticated user's profile.
-- **`GET /api/v1/users/{id}`**(ADMIN or own resource):  
-  Returns information for a specific user by ID.
-- **`PUT /api/v1/users/{id}`**(ADMIN or own resource):  
-  Updates user details.
+  Update own profile data.
+- **`GET /api/v1/users/{id}`** (ADMIN or owner):  
+  Fetch user by ID.
+- **`PUT /api/v1/users/{id}`** (ADMIN or owner):  
+  Update user by ID.
 
 #### **Post Management:**
 - **`GET /api/v1/posts`**:  
-  Lists all blog posts with pagination.
+  Paginated list of posts.
 - **`GET /api/v1/posts/me`**:  
-  Returns blog posts for the authenticated user.
+  Posts created by the authenticated user.
 - **`GET /api/v1/posts/{id}`**:  
-  Returns details for a specific post.
+  Post details.
 - **`POST /api/v1/posts`**:  
-  Creates a new blog post (Requires authentication).
+  Create a post (auth required).
 - **`PUT /api/v1/posts/{id}`**:  
-  Updates a post (Owner only).
+  Update a post (owner only).
+- **`DELETE /api/v1/posts/{id}`**:  
+  Delete a post (owner only).
 
-#### **Nested Comments (RESTful Resource Design):**
+#### **Nested Comments (per Post):**
 - **`GET /api/v1/posts/{postId}/comments`**:  
-  Returns comments for a specific post with pagination.
+  Paginated comments for a post.
 - **`POST /api/v1/posts/{postId}/comments`**:  
-  Adds a new comment to a post (Requires authentication).
+  Add comment to post (auth required).
 
 #### **Individual Comment Management:**
 - **`GET /api/v1/comments/{id}`**:  
-  Returns details for a specific comment.
+  Comment details.
 - **`PUT /api/v1/comments/{id}`**:  
-  Updates a comment (Owner only).
+  Update comment (owner only).
 - **`DELETE /api/v1/comments/{id}`**:  
-  Deletes a comment (Owner only).
+  Delete comment (owner only).
 
-#### **Nested Post Likes (RESTful Resource Design):**
+#### **Post Likes (Nested):**
 - **`POST /api/v1/posts/{postId}/likes`**:  
-  Likes a post (Requires authentication).
+  Like a post (auth required).
 - **`DELETE /api/v1/posts/{postId}/likes`**:  
-  Unlikes a post (Requires authentication).
+  Unlike a post (auth required).
 - **`GET /api/v1/posts/{postId}/likes`**:  
-  Returns likes for a specific post with pagination.
+  Paginated likes for a post.
 - **`GET /api/v1/posts/{postId}/likes/count`**:  
-  Returns like count for a specific post.
+  Total like count for a post.
 
-#### **Nested Comment Likes (RESTful Resource Design):**
+#### **Comment Likes (Nested):**
 - **`POST /api/v1/comments/{commentId}/likes`**:  
-  Likes a comment (Requires authentication).
+  Like a comment (auth required).
 - **`DELETE /api/v1/comments/{commentId}/likes`**:  
-  Unlikes a comment (Requires authentication).
+  Unlike a comment (auth required).
 - **`GET /api/v1/comments/{commentId}/likes`**:  
-  Returns likes for a specific comment with pagination.
+  Paginated likes for a comment.
 
-#### **REST API Best Practices Applied:**
-✅ **Nested Resources**: Related resources use hierarchical URL structure  
-✅ **Semantic URLs**: Resource relationships are clear from URL structure  
-✅ **Security First**: Method-level authorization with proper access control  
-✅ **Resource Ownership**: Users can only modify their own resources
+#### **Applied REST Conventions:**
+✅ **Nested Resources** (comments & likes under posts / comments)  
+✅ **Ownership Enforcement** (update/delete restricted)  
+✅ **Stateless Auth** (JWT in Authorization header)  
+✅ **Consistent Plural Nouns & Hierarchical URLs**
 
 ---
 
