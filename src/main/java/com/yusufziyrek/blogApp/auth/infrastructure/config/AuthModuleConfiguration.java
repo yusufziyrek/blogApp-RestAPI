@@ -11,9 +11,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ComponentScan(basePackages = {
     "com.yusufziyrek.blogApp.auth.infrastructure.web",
     "com.yusufziyrek.blogApp.auth.infrastructure.persistence",
-    "com.yusufziyrek.blogApp.auth.application.usecases"
+    "com.yusufziyrek.blogApp.auth.infrastructure.usecases.impl",
+    "com.yusufziyrek.blogApp.auth.infrastructure.mappers"
 })
-@EntityScan(basePackages = "com.yusufziyrek.blogApp.auth.domain")
+@EntityScan(basePackages = "com.yusufziyrek.blogApp.auth.infrastructure.persistence")
 @EnableJpaRepositories(basePackages = "com.yusufziyrek.blogApp.auth.infrastructure.persistence")
 @EnableAsync
 @EnableScheduling

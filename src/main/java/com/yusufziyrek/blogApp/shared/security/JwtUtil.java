@@ -2,6 +2,7 @@ package com.yusufziyrek.blogApp.shared.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import java.util.Base64;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtUtil {
 
     private final SecretKey secretKey;
@@ -23,10 +25,11 @@ public class JwtUtil {
         byte[] decodedKey = Base64.getDecoder().decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(decodedKey);
         this.expirationTime = expirationTime;
-        this.refreshExpirationTime = expirationTime * 24; // 24 times longer for refresh token
+    this.refreshExpirationTime = expirationTime * 24; // refresh token için 24 kat daha uzun
     }
 
     public String generateToken(String email, Long userId) {
+        log.info("Generating JWT token for user: {}", email);
         return Jwts.builder()
                 .setSubject(email)
                 .claim("id", userId)
@@ -41,6 +44,7 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
         } catch (JwtException e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
             return false;
         }
     }

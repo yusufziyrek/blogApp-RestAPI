@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yusufziyrek.blogApp.like.domain.Like;
+import com.yusufziyrek.blogApp.like.domain.LikeDomain;
 import com.yusufziyrek.blogApp.like.application.ports.LikeRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class GetPostLikesUseCase {
     
     private final LikeRepository likeRepository;
     
-    public Page<Like> execute(Long postId, Pageable pageable) {
+    public Page<LikeDomain> execute(Long postId, Pageable pageable) {
         return likeRepository.findByPostId(postId, pageable);
     }
     

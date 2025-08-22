@@ -1,7 +1,14 @@
 package com.yusufziyrek.blogApp.like.infrastructure.persistence;
 
 import com.yusufziyrek.blogApp.like.application.ports.LikeRepository;
-import com.yusufziyrek.blogApp.like.domain.Like;
+import com.yusufziyrek.blogApp.like.domain.LikeDomain;
+import com.yusufziyrek.blogApp.like.infrastructure.mappers.LikeMapper;
+import com.yusufziyrek.blogApp.user.infrastructure.persistence.entity.UserEntity;
+import com.yusufziyrek.blogApp.post.infrastructure.persistence.PostEntity;
+import com.yusufziyrek.blogApp.comment.infrastructure.persistence.CommentEntity;
+import com.yusufziyrek.blogApp.user.infrastructure.persistence.JpaUserRepository;
+import com.yusufziyrek.blogApp.post.infrastructure.persistence.JpaPostRepository;
+import com.yusufziyrek.blogApp.comment.infrastructure.persistence.JpaCommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,40 +21,70 @@ import java.util.Optional;
 public class LikeRepositoryImpl implements LikeRepository {
     
     private final JpaLikeRepository jpaLikeRepository;
+    private final LikeMapper likeMapper;
+    private final JpaUserRepository jpaUserRepository;
+    private final JpaPostRepository jpaPostRepository;
+    private final JpaCommentRepository jpaCommentRepository;
     
     @Override
-    public Like save(Like like) {
-        return jpaLikeRepository.save(like);
+    public LikeDomain save(LikeDomain like) {
+        LikeEntity entity = likeMapper.toEntity(like);
+        
+    // İlgili referansları yükleyip setliyorum
+        UserEntity user = jpaUserRepository.findById(like.getUserId())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        entity.setUser(user);
+        
+        if (like.getPostId() != null) {
+            PostEntity post = jpaPostRepository.findById(like.getPostId())
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+            entity.setPost(post);
+        }
+        
+        if (like.getCommentId() != null) {
+            CommentEntity comment = jpaCommentRepository.findById(like.getCommentId())
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+            entity.setComment(comment);
+        }
+        
+        LikeEntity savedEntity = jpaLikeRepository.save(entity);
+        return likeMapper.toDomain(savedEntity);
     }
     
     @Override
-    public Optional<Like> findById(Long id) {
-        return jpaLikeRepository.findById(id);
+    public Optional<LikeDomain> findById(Long id) {
+        return jpaLikeRepository.findById(id)
+            .map(likeMapper::toDomain);
     }
     
     @Override
-    public Optional<Like> findByUserIdAndPostId(Long userId, Long postId) {
-        return jpaLikeRepository.findByUserIdAndPostId(userId, postId);
+    public Optional<LikeDomain> findByUserIdAndPostId(Long userId, Long postId) {
+        return jpaLikeRepository.findByUserIdAndPostId(userId, postId)
+            .map(likeMapper::toDomain);
     }
     
     @Override
-    public Optional<Like> findByUserIdAndCommentId(Long userId, Long commentId) {
-        return jpaLikeRepository.findByUserIdAndCommentId(userId, commentId);
+    public Optional<LikeDomain> findByUserIdAndCommentId(Long userId, Long commentId) {
+        return jpaLikeRepository.findByUserIdAndCommentId(userId, commentId)
+            .map(likeMapper::toDomain);
     }
     
     @Override
-    public Page<Like> findByPostId(Long postId, Pageable pageable) {
-        return jpaLikeRepository.findByPostId(postId, pageable);
+    public Page<LikeDomain> findByPostId(Long postId, Pageable pageable) {
+        return jpaLikeRepository.findByPostId(postId, pageable)
+            .map(likeMapper::toDomain);
     }
     
     @Override
-    public Page<Like> findByCommentId(Long commentId, Pageable pageable) {
-        return jpaLikeRepository.findByCommentId(commentId, pageable);
+    public Page<LikeDomain> findByCommentId(Long commentId, Pageable pageable) {
+        return jpaLikeRepository.findByCommentId(commentId, pageable)
+            .map(likeMapper::toDomain);
     }
     
     @Override
-    public Page<Like> findByUserId(Long userId, Pageable pageable) {
-        return jpaLikeRepository.findByUserId(userId, pageable);
+    public Page<LikeDomain> findByUserId(Long userId, Pageable pageable) {
+        return jpaLikeRepository.findByUserId(userId, pageable)
+            .map(likeMapper::toDomain);
     }
     
     @Override
@@ -61,8 +98,9 @@ public class LikeRepositoryImpl implements LikeRepository {
     }
     
     @Override
-    public void delete(Like like) {
-        jpaLikeRepository.delete(like);
+    public void delete(LikeDomain like) {
+        LikeEntity entity = likeMapper.toEntity(like);
+        jpaLikeRepository.delete(entity);
     }
     
     @Override

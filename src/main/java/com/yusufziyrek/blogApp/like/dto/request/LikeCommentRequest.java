@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LikeCommentRequest {
     
-    @NotNull(message = "Comment ID is required")
+    @NotNull(message = "CommentDomain ID is required")
     private Long commentId;
 }

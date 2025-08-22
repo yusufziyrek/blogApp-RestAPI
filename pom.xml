@@ -17,14 +17,6 @@
 	
 	<url>https://github.com/yusufziyrek/blogApp-RestAPI</url>
 	
-	<licenses>
-		<license>
-			<name>MIT License</name>
-			<url>https://opensource.org/licenses/MIT</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	
 	<developers>
 		<developer>
 			<id>yusufziyrek</id>
@@ -44,7 +36,7 @@
 	</scm>
 	
 	<properties>
-		<java.version>24</java.version>
+		<java.version>21</java.version>
 		<lombok.version>1.18.38</lombok.version>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
 	</properties>

@@ -14,7 +14,7 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
         
-        // Cache isimlerini tanımla
+        // Cache isimlerini tanımlıyorum
         cacheManager.setCacheNames(java.util.Arrays.asList(
             "userDetails", "allUsers", "allPosts", "postDetails", "userPostTitles", "userPosts",
             "commentsForPost", "commentsForUser", "commentDetails", "likesForPost", "likesForComment"

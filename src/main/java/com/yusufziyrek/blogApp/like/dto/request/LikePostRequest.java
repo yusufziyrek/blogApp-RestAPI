@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LikePostRequest {
     
-    @NotNull(message = "Post ID is required")
+    @NotNull(message = "PostDomain ID is required")
     private Long postId;
 }

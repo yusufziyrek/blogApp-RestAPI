@@ -1,7 +1,7 @@
 package com.yusufziyrek.blogApp.auth.application.ports;
 
-import com.yusufziyrek.blogApp.auth.domain.RefreshToken;
-import com.yusufziyrek.blogApp.user.domain.User;
+import com.yusufziyrek.blogApp.auth.domain.RefreshTokenDomain;
+import com.yusufziyrek.blogApp.user.domain.UserDomain;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,25 +9,27 @@ import java.util.Optional;
 
 public interface RefreshTokenRepository {
     
-    RefreshToken save(RefreshToken refreshToken);
+    RefreshTokenDomain save(RefreshTokenDomain refreshToken);
     
-    Optional<RefreshToken> findByToken(String token);
+    Optional<RefreshTokenDomain> findByToken(String token);
     
-    Optional<RefreshToken> findByTokenAndIsRevokedFalse(String token);
+    Optional<RefreshTokenDomain> findByTokenAndIsRevokedFalse(String token);
     
-    List<RefreshToken> findByUserAndIsRevokedFalse(User user);
+    List<RefreshTokenDomain> findByUserAndIsRevokedFalse(UserDomain user);
     
     void deleteByToken(String token);
     
-    void deleteByUser(User user);
+    void deleteByUser(UserDomain user);
     
     void deleteExpiredTokens();
     
-    void revokeAllByUser(User user);
+    void revokeAllByUser(UserDomain user);
     
-    int countActiveTokensByUser(User user);
+    int countActiveTokensByUser(UserDomain user);
     
-    List<RefreshToken> findExpiredTokens();
+    List<RefreshTokenDomain> findExpiredTokens();
+    
+    List<RefreshTokenDomain> findTokensExpiringBefore(LocalDateTime dateTime);
     
     void deleteByExpiresAtBefore(LocalDateTime dateTime);
 }

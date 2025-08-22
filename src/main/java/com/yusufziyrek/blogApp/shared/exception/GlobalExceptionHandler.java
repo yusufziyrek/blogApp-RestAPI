@@ -12,109 +12,203 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(UserException.class)
-	public ResponseEntity<CustomProblemDetail> handleUserException(UserException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(),
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
-	}
+    // Domain'e özel istisnalar
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<CustomProblemDetail> handleUserException(UserException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.BAD_REQUEST.value(), 
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(detail);
+    }
 
-	@ExceptionHandler(PostException.class)
-	public ResponseEntity<CustomProblemDetail> handlePostException(PostException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(),
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
-	}
+    @ExceptionHandler(PostException.class)
+    public ResponseEntity<CustomProblemDetail> handlePostException(PostException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.NOT_FOUND.value(), 
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(detail);
+    }
 
-	@ExceptionHandler(CommentException.class)
-	public ResponseEntity<CustomProblemDetail> handleCommentException(CommentException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(),
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
-	}
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<CustomProblemDetail> handleCommentException(CommentException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.NOT_FOUND.value(), 
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(detail);
+    }
 
-	@ExceptionHandler(LikeException.class)
-	public ResponseEntity<CustomProblemDetail> handleLikeException(LikeException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(),
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
-	}
+    @ExceptionHandler(LikeException.class)
+    public ResponseEntity<CustomProblemDetail> handleLikeException(LikeException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.NOT_FOUND.value(), 
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(detail);
+    }
 
-	@ExceptionHandler(AuthException.class)
-	public ResponseEntity<CustomProblemDetail> handleAuthException(AuthException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.UNAUTHORIZED.value(), ex.getMessage(),
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.UNAUTHORIZED);
-	}
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<CustomProblemDetail> handleAuthException(AuthException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.UNAUTHORIZED.value(), 
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(detail);
+    }
 
-	@ExceptionHandler(AccessDeniedException.class)
-	public ResponseEntity<CustomProblemDetail> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.FORBIDDEN.value(), ErrorMessages.ACCESS_DENIED,
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.FORBIDDEN);
-	}
+    // Validation errors için temiz mesajlar
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<CustomProblemDetail> handleValidationExceptions(
+            MethodArgumentNotValidException ex, WebRequest request) {
+        
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
 
-	@ExceptionHandler(AuthenticationException.class)
-	public ResponseEntity<CustomProblemDetail> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.UNAUTHORIZED.value(), ErrorMessages.INVALID_CREDENTIALS,
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.UNAUTHORIZED);
-	}
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.BAD_REQUEST.value(), 
+                "Girilen bilgiler geçersiz",
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        detail.setValidationErrors(errors);
 
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<CustomProblemDetail> handleValidationExceptions(MethodArgumentNotValidException ex,
-			WebRequest request) {
-		Map<String, String> errors = new HashMap<>();
-		ex.getBindingResult().getAllErrors().forEach(error -> {
-			String fieldName = ((FieldError) error).getField();
-			String errorMessage = error.getDefaultMessage();
-			errors.put(fieldName, errorMessage);
-		});
+        return ResponseEntity.badRequest().body(detail);
+    }
 
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.BAD_REQUEST.value(), ErrorMessages.VALIDATION_FAILED,
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		detail.setValidationErrors(errors);
+    // Kimlik doğrulama hataları
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<CustomProblemDetail> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.UNAUTHORIZED.value(), 
+                "Giriş yapmanız gerekiyor",
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(detail);
+    }
 
-		return new ResponseEntity<>(detail, HttpStatus.BAD_REQUEST);
-	}
+    // Yetkilendirme hataları
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<CustomProblemDetail> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.FORBIDDEN.value(), 
+                "Bu işlem için yetkiniz bulunmuyor",
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(detail);
+    }
 
-	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
-	public ResponseEntity<CustomProblemDetail> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, WebRequest request) {
-		String message = String.format("Invalid parameter type: expected %s for %s", ex.getRequiredType().getSimpleName(), ex.getName());
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.BAD_REQUEST.value(), message,
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.BAD_REQUEST);
-	}
+    // Geçersiz istek hataları
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<CustomProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.BAD_REQUEST.value(), 
+                "Geçersiz parametre",
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(detail);
+    }
 
-	@ExceptionHandler(NoHandlerFoundException.class)
-	public ResponseEntity<CustomProblemDetail> handleNoHandlerFoundException(NoHandlerFoundException ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.NOT_FOUND.value(), ErrorMessages.RESOURCE_NOT_FOUND,
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
-	}
+    // Tip uyumsuzluğu hataları
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<CustomProblemDetail> handleTypeMismatchException(MethodArgumentTypeMismatchException ex, WebRequest request) {
+        String message;
+        if ("me".equals(ex.getValue())) {
+            message = "Geçersiz endpoint kullanımı";
+        } else {
+            message = "Geçersiz parametre formatı";
+        }
+        
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.BAD_REQUEST.value(), 
+                message,
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(detail);
+    }
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<CustomProblemDetail> handleGenericException(Exception ex, WebRequest request) {
-		CustomProblemDetail detail = new CustomProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR.value(), ErrorMessages.INTERNAL_SERVER_ERROR,
-				request.getDescription(false).substring(4), getMachineName(), LocalDateTime.now());
-		return new ResponseEntity<>(detail, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+    // JSON ayrıştırma hataları
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<CustomProblemDetail> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.BAD_REQUEST.value(), 
+                "Gönderilen veri formatı hatalı",
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(detail);
+    }
 
-	private String getMachineName() {
-		try {
-			return InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			return "Unknown";
-		}
-	}
+    // Null pointer hataları
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<CustomProblemDetail> handleNullPointerException(NullPointerException ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.BAD_REQUEST.value(), 
+                "Gerekli alanlar eksik",
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(detail);
+    }
 
+    // Genel exception handler (bilinmeyen hatalar için)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<CustomProblemDetail> handleGeneralException(Exception ex, WebRequest request) {
+        CustomProblemDetail detail = new CustomProblemDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                "Sistem hatası oluştu. Lütfen daha sonra tekrar deneyin",
+                request.getDescription(false).replace("uri=", ""), 
+                getMachineName(), 
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(detail);
+    }
+
+    private String getMachineName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            return "Unknown";
+        }
+    }
 }

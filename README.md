@@ -47,7 +47,7 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
 
 ### **Architecture**
 
-The project follows Clean Architecture with DDD tactics in a Modular Monolith setup:
+The project follows Clean Architecture in a Modular Monolith setup:
 
 - Domain-centric modules: `auth/`, `user/`, `post/`, `comment/`, `like/` (+ `shared/` for cross-cutting concerns)
 - Layers per module:
@@ -96,22 +96,20 @@ Cross-cutting concerns live under `shared/` (Security/JWT, CORS/Cache config, ex
   Refreshes the JWT token.
 
 #### **User Management:**
-- **`GET /api/v1/users`**:  
-  Lists all users.
+- **`GET /api/v1/users`**(ADMIN only):  
+  Lists all users with pagination.
 - **`GET /api/v1/users/me`**:  
-  Returns the user profile for the authenticated user.
-- **`GET /api/v1/users/by-username/{username}`**:  
-  Returns information for a specific user by username.
-- **`GET /api/v1/users/{id}`**:  
+  Returns the current authenticated user's profile.
+- **`PUT /api/v1/users/me`**:  
+  Updates the current authenticated user's profile.
+- **`GET /api/v1/users/{id}`**(ADMIN or own resource):  
   Returns information for a specific user by ID.
-- **`PUT /api/v1/users/{id}`**:  
+- **`PUT /api/v1/users/{id}`**(ADMIN or own resource):  
   Updates user details.
-- **`DELETE /api/v1/users/{id}`**:  
-  Deletes a user.
 
 #### **Post Management:**
 - **`GET /api/v1/posts`**:  
-  Lists all blog posts.
+  Lists all blog posts with pagination.
 - **`GET /api/v1/posts/me`**:  
   Returns blog posts for the authenticated user.
 - **`GET /api/v1/posts/{id}`**:  
@@ -119,43 +117,45 @@ Cross-cutting concerns live under `shared/` (Security/JWT, CORS/Cache config, ex
 - **`POST /api/v1/posts`**:  
   Creates a new blog post (Requires authentication).
 - **`PUT /api/v1/posts/{id}`**:  
-  Updates a post (Requires authentication).
-- **`DELETE /api/v1/posts/{id}`**:  
-  Deletes a post (Requires authentication).
+  Updates a post (Owner only).
 
-#### **Comment Management:**
-- **`GET /api/v1/comments/post/{postId}`**:  
-  Returns comments for a specific post.
-- **`GET /api/v1/comments/user`**:  
-  Returns comments for the authenticated user.
+#### **Nested Comments (RESTful Resource Design):**
+- **`GET /api/v1/posts/{postId}/comments`**:  
+  Returns comments for a specific post with pagination.
+- **`POST /api/v1/posts/{postId}/comments`**:  
+  Adds a new comment to a post (Requires authentication).
+
+#### **Individual Comment Management:**
 - **`GET /api/v1/comments/{id}`**:  
   Returns details for a specific comment.
-- **`POST /api/v1/comments/post/{postId}`**:  
-  Adds a new comment to a post (Requires authentication).
 - **`PUT /api/v1/comments/{id}`**:  
-  Updates a comment (Requires authentication).
+  Updates a comment (Owner only).
 - **`DELETE /api/v1/comments/{id}`**:  
-  Deletes a comment (Requires authentication).
+  Deletes a comment (Owner only).
 
-#### **Like Management:**
-- **`GET /api/v1/likes/post/{postId}`**:  
-  Returns likes for a specific post.
-- **`GET /api/v1/likes/comment/{commentId}`**:  
-  Returns likes for a specific comment.
-- **`GET /api/v1/likes/{id}`**:  
-  Returns details for a specific like.
-- **`POST /api/v1/likes/post/{postId}`**:  
+#### **Nested Post Likes (RESTful Resource Design):**
+- **`POST /api/v1/posts/{postId}/likes`**:  
   Likes a post (Requires authentication).
-- **`POST /api/v1/likes/comment/{commentId}`**:  
-  Likes a comment (Requires authentication).
-- **`DELETE /api/v1/likes/post/{likeId}`**:  
-  Deletes a like from a post (Requires authentication).
-- **`DELETE /api/v1/likes/comment/{likeId}`**:  
-  Deletes a like from a comment (Requires authentication).
+- **`DELETE /api/v1/posts/{postId}/likes`**:  
+  Unlikes a post (Requires authentication).
+- **`GET /api/v1/posts/{postId}/likes`**:  
+  Returns likes for a specific post with pagination.
+- **`GET /api/v1/posts/{postId}/likes/count`**:  
+  Returns like count for a specific post.
 
-#### **Search Functionality:**
-- **`GET /api/v1/search`**:  
-  Searches posts, users, or all fields based on a query and an optional type parameter (default is "all").
+#### **Nested Comment Likes (RESTful Resource Design):**
+- **`POST /api/v1/comments/{commentId}/likes`**:  
+  Likes a comment (Requires authentication).
+- **`DELETE /api/v1/comments/{commentId}/likes`**:  
+  Unlikes a comment (Requires authentication).
+- **`GET /api/v1/comments/{commentId}/likes`**:  
+  Returns likes for a specific comment with pagination.
+
+#### **REST API Best Practices Applied:**
+✅ **Nested Resources**: Related resources use hierarchical URL structure  
+✅ **Semantic URLs**: Resource relationships are clear from URL structure  
+✅ **Security First**: Method-level authorization with proper access control  
+✅ **Resource Ownership**: Users can only modify their own resources
 
 ---
 
@@ -312,10 +312,6 @@ For more information, check the [GitHub repository](https://github.com/yusufziyr
 
 ---
 
-## **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ### **Contributing**
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
@@ -331,7 +327,6 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ---
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Java](https://img.shields.io/badge/Java-24-orange.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)]()

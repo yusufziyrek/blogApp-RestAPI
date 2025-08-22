@@ -10,6 +10,7 @@ public class CommentResponse {
     private String text;
     private int likeCount;
     private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
     private String authorUsername;
     private String authorFullName;
     private Long postId;

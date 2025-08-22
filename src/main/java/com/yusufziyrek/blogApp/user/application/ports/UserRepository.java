@@ -1,17 +1,22 @@
 package com.yusufziyrek.blogApp.user.application.ports;
 
-import com.yusufziyrek.blogApp.user.domain.User;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.yusufziyrek.blogApp.user.domain.UserDomain;
+import java.util.List;
 import java.util.Optional;
 
+/**
+ * Port (Interface) for UserDomain Repository
+ * No framework dependencies - Pure domain interface
+ */
 public interface UserRepository {
-    Page<User> findAll(Pageable pageable);
-    Optional<User> findById(Long id);
-    Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
-    User save(User user);
+    List<UserDomain> findAll(int page, int size);
+    Optional<UserDomain> findById(Long id);
+    Optional<UserDomain> findByUsername(String username);
+    Optional<UserDomain> findByEmail(String email);
+    Optional<UserDomain> findByUsernameOrEmail(String username, String email);
+    UserDomain save(UserDomain user);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     void deleteById(Long id);
+    long getTotalCount();
 }

@@ -2,7 +2,6 @@ package com.yusufziyrek.blogApp.shared.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -22,6 +21,7 @@ import com.yusufziyrek.blogApp.shared.security.CustomAuthEntryPoint;
 import com.yusufziyrek.blogApp.shared.security.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
@@ -29,6 +29,7 @@ import java.util.Arrays;
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -39,30 +40,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("Configuring security filter chain");
         http
            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
            .csrf(csrf -> csrf.disable())
            .authorizeHttpRequests(auth -> auth
                .requestMatchers(API_BASE + "/auth/**").permitAll()
-               .requestMatchers(HttpMethod.GET,
-                   API_BASE + "/posts/**",
-                   API_BASE + "/comments/**",
-                   API_BASE + "/likes/**",
-                   API_BASE + "/search/**",
-                   API_BASE + "/stats/**").permitAll()
-               .requestMatchers(API_BASE + "/users/**").authenticated()
-               .requestMatchers(HttpMethod.POST,
-                   API_BASE + "/posts/**",
-                   API_BASE + "/comments/**",
-                   API_BASE + "/likes/**").authenticated()
-               .requestMatchers(HttpMethod.PUT,
-                   API_BASE + "/posts/**",
-                   API_BASE + "/comments/**").authenticated()
-               .requestMatchers(HttpMethod.DELETE,
-                   API_BASE + "/posts/**",
-                   API_BASE + "/comments/**",
-                   API_BASE + "/likes/**").authenticated()
-               .requestMatchers(API_BASE + "/admin/**").hasRole("ADMIN")
                .anyRequest().authenticated()
            )
            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -72,6 +55,7 @@ public class SecurityConfig {
            )
            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+        log.info("Security filter chain configured successfully");
         return http.build();
     }
 

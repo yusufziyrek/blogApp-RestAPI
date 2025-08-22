@@ -34,5 +34,5 @@ public class UpdateUserRequest {
     private Integer age;
     
     @Size(min = 6, max = 50, message = "Password must be between 6 and 50 characters")
-    private String password; // Optional - only if user wants to change password
+    private String password; // isteğe bağlı, şifre değişecekse gönder
 }

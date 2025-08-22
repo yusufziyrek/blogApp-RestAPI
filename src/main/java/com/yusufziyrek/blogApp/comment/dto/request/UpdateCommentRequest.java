@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class UpdateCommentRequest {
     
-    @NotBlank(message = "Comment text cannot be blank")
-    @Size(min = 1, max = 1000, message = "Comment text must be between 1 and 1000 characters")
+    @NotBlank(message = "CommentDomain text cannot be blank")
+    @Size(min = 1, max = 1000, message = "CommentDomain text must be between 1 and 1000 characters")
     private String text;
 }

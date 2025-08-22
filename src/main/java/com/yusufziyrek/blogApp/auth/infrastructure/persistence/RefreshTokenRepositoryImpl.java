@@ -4,14 +4,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yusufziyrek.blogApp.auth.application.ports.RefreshTokenRepository;
-import com.yusufziyrek.blogApp.auth.domain.RefreshToken;
-import com.yusufziyrek.blogApp.user.domain.User;
+import com.yusufziyrek.blogApp.auth.domain.RefreshTokenDomain;
+import com.yusufziyrek.blogApp.auth.infrastructure.mappers.RefreshTokenMapper;
+import com.yusufziyrek.blogApp.user.domain.UserDomain;
+import com.yusufziyrek.blogApp.user.infrastructure.persistence.entity.UserEntity;
+import com.yusufziyrek.blogApp.user.infrastructure.persistence.JpaUserRepository;
 
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -19,28 +23,43 @@ import java.util.Optional;
 public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 
     private final JpaRefreshTokenRepository jpaRefreshTokenRepository;
+    private final RefreshTokenMapper refreshTokenMapper;
+    private final JpaUserRepository jpaUserRepository;
 
     @Override
-    public RefreshToken save(RefreshToken refreshToken) {
-        return jpaRefreshTokenRepository.save(refreshToken);
+    public RefreshTokenDomain save(RefreshTokenDomain refreshToken) {
+        RefreshTokenEntity entity = refreshTokenMapper.toEntity(refreshToken);
+        
+    // Kullanıcı referansını yükle ve setle
+        UserEntity user = jpaUserRepository.findById(refreshToken.getUserId())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        entity.setUser(user);
+        
+        RefreshTokenEntity savedEntity = jpaRefreshTokenRepository.save(entity);
+        return refreshTokenMapper.toDomain(savedEntity);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<RefreshToken> findByToken(String token) {
-        return jpaRefreshTokenRepository.findByToken(token);
+    public Optional<RefreshTokenDomain> findByToken(String token) {
+        return jpaRefreshTokenRepository.findByToken(token)
+            .map(refreshTokenMapper::toDomain);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<RefreshToken> findByTokenAndIsRevokedFalse(String token) {
-        return jpaRefreshTokenRepository.findByTokenAndIsRevokedFalse(token);
+    public Optional<RefreshTokenDomain> findByTokenAndIsRevokedFalse(String token) {
+        return jpaRefreshTokenRepository.findByTokenAndIsRevokedFalse(token)
+            .map(refreshTokenMapper::toDomain);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<RefreshToken> findByUserAndIsRevokedFalse(User user) {
-        return jpaRefreshTokenRepository.findByUserAndIsRevokedFalse(user);
+    public List<RefreshTokenDomain> findByUserAndIsRevokedFalse(UserDomain user) {
+        return jpaRefreshTokenRepository.findByUserIdAndIsRevokedFalse(user.getId())
+            .stream()
+            .map(refreshTokenMapper::toDomain)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -49,8 +68,8 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
 
     @Override
-    public void deleteByUser(User user) {
-        jpaRefreshTokenRepository.deleteByUser(user);
+    public void deleteByUser(UserDomain user) {
+        jpaRefreshTokenRepository.deleteByUserId(user.getId());
     }
 
     @Override
@@ -59,20 +78,34 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
 
     @Override
-    public void revokeAllByUser(User user) {
-        jpaRefreshTokenRepository.revokeAllByUser(user);
+    public void revokeAllByUser(UserDomain user) {
+        List<RefreshTokenEntity> tokens = jpaRefreshTokenRepository.findByUserIdAndIsRevokedFalse(user.getId());
+        tokens.forEach(token -> token.setIsRevoked(true));
+        jpaRefreshTokenRepository.saveAll(tokens);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public int countActiveTokensByUser(User user) {
-        return jpaRefreshTokenRepository.countActiveTokensByUser(user, LocalDateTime.now());
+    public int countActiveTokensByUser(UserDomain user) {
+        return Math.toIntExact(jpaRefreshTokenRepository.countByUserIdAndIsRevokedFalse(user.getId()));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<RefreshToken> findExpiredTokens() {
-        return jpaRefreshTokenRepository.findExpiredTokens(LocalDateTime.now());
+    public List<RefreshTokenDomain> findExpiredTokens() {
+        return jpaRefreshTokenRepository.findByExpiresAtBefore(LocalDateTime.now())
+            .stream()
+            .map(refreshTokenMapper::toDomain)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RefreshTokenDomain> findTokensExpiringBefore(LocalDateTime dateTime) {
+        return jpaRefreshTokenRepository.findByExpiresAtBefore(dateTime)
+            .stream()
+            .map(refreshTokenMapper::toDomain)
+            .collect(Collectors.toList());
     }
 
     @Override
