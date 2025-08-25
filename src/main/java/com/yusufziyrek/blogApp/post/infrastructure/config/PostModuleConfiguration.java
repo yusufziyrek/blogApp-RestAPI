@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import com.yusufziyrek.blogApp.post.application.ports.PostRepository;
 import com.yusufziyrek.blogApp.post.application.usecases.CreatePostUseCase;
 import com.yusufziyrek.blogApp.post.application.usecases.CreatePostUseCaseImpl;
+import com.yusufziyrek.blogApp.post.application.usecases.DeletePostUseCase;
+import com.yusufziyrek.blogApp.post.application.usecases.DeletePostUseCaseImpl;
 import com.yusufziyrek.blogApp.post.application.usecases.GetAllPostsUseCase;
 import com.yusufziyrek.blogApp.post.application.usecases.GetAllPostsUseCaseImpl;
 import com.yusufziyrek.blogApp.post.application.usecases.GetPostByIdUseCase;
@@ -17,6 +19,14 @@ import com.yusufziyrek.blogApp.post.application.usecases.GetPostsByUserIdUseCase
 import com.yusufziyrek.blogApp.post.application.usecases.GetPostsByUserIdUseCaseImpl;
 import com.yusufziyrek.blogApp.post.application.usecases.UpdatePostUseCase;
 import com.yusufziyrek.blogApp.post.application.usecases.UpdatePostUseCaseImpl;
+import com.yusufziyrek.blogApp.post.application.services.PostApplicationService;
+import com.yusufziyrek.blogApp.comment.application.usecases.CreateCommentUseCase;
+import com.yusufziyrek.blogApp.comment.application.usecases.GetCommentsForPostUseCase;
+import com.yusufziyrek.blogApp.like.application.usecases.LikePostUseCase;
+import com.yusufziyrek.blogApp.like.application.usecases.UnlikeUseCase;
+import com.yusufziyrek.blogApp.like.application.usecases.GetPostLikesUseCase;
+import com.yusufziyrek.blogApp.user.application.usecases.GetUserByIdUseCase;
+import com.yusufziyrek.blogApp.post.infrastructure.mappers.PostMapper;
 
 /**
  * Configuration for PostDomain Module
@@ -55,5 +65,42 @@ public class PostModuleConfiguration {
     @Bean
     public GetPostsByUserIdUseCase getPostsByUserIdUseCase(PostRepository postRepository) {
         return new GetPostsByUserIdUseCaseImpl(postRepository);
+    }
+    
+    @Bean
+    public DeletePostUseCase deletePostUseCase(PostRepository postRepository) {
+        return new DeletePostUseCaseImpl(postRepository);
+    }
+    
+    @Bean
+    public PostApplicationService postApplicationService(
+            CreatePostUseCase createPostUseCase,
+            DeletePostUseCase deletePostUseCase,
+            GetAllPostsUseCase getAllPostsUseCase,
+            GetPostByIdUseCase getPostByIdUseCase,
+            GetPostsByUserIdUseCase getPostsByUserIdUseCase,
+            UpdatePostUseCase updatePostUseCase,
+            CreateCommentUseCase createCommentUseCase,
+            GetCommentsForPostUseCase getCommentsForPostUseCase,
+            LikePostUseCase likePostUseCase,
+            UnlikeUseCase unlikeUseCase,
+            GetPostLikesUseCase getPostLikesUseCase,
+            GetUserByIdUseCase getUserByIdUseCase,
+            PostMapper postMapper) {
+        return new PostApplicationService(
+                createPostUseCase,
+                deletePostUseCase,
+                getAllPostsUseCase,
+                getPostByIdUseCase,
+                getPostsByUserIdUseCase,
+                updatePostUseCase,
+                createCommentUseCase,
+                getCommentsForPostUseCase,
+                likePostUseCase,
+                unlikeUseCase,
+                getPostLikesUseCase,
+                getUserByIdUseCase,
+                postMapper
+        );
     }
 }

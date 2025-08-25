@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yusufziyrek.blogApp.auth.application.ports.usecases.CreateRefreshTokenUseCase;
-import com.yusufziyrek.blogApp.auth.application.ports.usecases.RegisterUserUseCase;
-import com.yusufziyrek.blogApp.auth.application.ports.usecases.ValidateRefreshTokenUseCase;
+import com.yusufziyrek.blogApp.auth.application.usecases.CreateRefreshTokenUseCase;
+import com.yusufziyrek.blogApp.auth.application.usecases.RegisterUserUseCase;
+import com.yusufziyrek.blogApp.auth.application.usecases.ValidateRefreshTokenUseCase;
 import com.yusufziyrek.blogApp.auth.domain.RefreshTokenDomain;
 import com.yusufziyrek.blogApp.auth.dto.request.LoginRequest;
 import com.yusufziyrek.blogApp.auth.dto.request.RefreshTokenRequest;

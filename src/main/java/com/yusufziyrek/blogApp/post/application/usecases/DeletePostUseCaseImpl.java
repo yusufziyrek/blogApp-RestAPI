@@ -1,19 +1,17 @@
 package com.yusufziyrek.blogApp.post.application.usecases;
 
-import org.springframework.stereotype.Service;
-
 import com.yusufziyrek.blogApp.post.application.ports.PostRepository;
 import com.yusufziyrek.blogApp.post.domain.PostDomain;
 import com.yusufziyrek.blogApp.shared.exception.PostException;
 import com.yusufziyrek.blogApp.shared.exception.AuthException;
 
-import lombok.RequiredArgsConstructor;
-
-@Service
-@RequiredArgsConstructor
 public class DeletePostUseCaseImpl implements DeletePostUseCase {
     
     private final PostRepository postRepository;
+    
+    public DeletePostUseCaseImpl(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
     
     @Override
     public void execute(Long postId, Long currentUserId) {
