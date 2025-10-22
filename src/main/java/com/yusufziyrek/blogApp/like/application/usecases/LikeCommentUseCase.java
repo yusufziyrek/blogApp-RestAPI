@@ -1,13 +1,16 @@
 package com.yusufziyrek.blogApp.like.application.usecases;
 
-import com.yusufziyrek.blogApp.like.domain.LikeDomain;
-import com.yusufziyrek.blogApp.like.application.ports.LikeRepository;
-import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
+import org.springframework.http.HttpStatus;
+
 import com.yusufziyrek.blogApp.comment.application.ports.CommentRepository;
 import com.yusufziyrek.blogApp.comment.domain.CommentDomain;
-import com.yusufziyrek.blogApp.shared.exception.UserException;
+import com.yusufziyrek.blogApp.like.application.ports.LikeRepository;
+import com.yusufziyrek.blogApp.like.domain.LikeDomain;
 import com.yusufziyrek.blogApp.shared.exception.CommentException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.exception.LikeException;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
+import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
 
 public class LikeCommentUseCase {
     
@@ -24,19 +27,16 @@ public class LikeCommentUseCase {
     public LikeDomain execute(Long userId, Long commentId) {
         // Kullanıcının varlığını kontrol et (şimdilik sadece var mı yok mu)
         // TODO: UserRepository'ye existsById ekle
-        try {
-            userRepository.findById(userId).orElseThrow(() -> new UserException("UserDomain not found with id: " + userId));
-        } catch (Exception e) {
-            throw new UserException("UserDomain not found with id: " + userId);
-        }
+        userRepository.findById(userId)
+            .orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, userId), HttpStatus.NOT_FOUND));
         
         // Yorumun varlığını kontrol et ve beğeni sayısını güncellemek için yükle
         CommentDomain comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new CommentException("CommentDomain not found with id: " + commentId));
+            .orElseThrow(() -> new CommentException(String.format(ErrorMessages.COMMENT_NOT_FOUND_BY_ID, commentId), HttpStatus.NOT_FOUND));
         
         // Zaten beğenilmiş mi kontrol et
         if (likeRepository.existsByUserIdAndCommentId(userId, commentId)) {
-            throw new LikeException("UserDomain has already liked this comment");
+            throw new LikeException(ErrorMessages.LIKE_ALREADY_EXISTS_FOR_COMMENT, HttpStatus.CONFLICT);
         }
         
         try {
@@ -54,7 +54,7 @@ public class LikeCommentUseCase {
             
             return savedLike;
         } catch (Exception e) {
-            throw new LikeException("Failed to create like: " + e.getMessage());
+            throw new LikeException(String.format("Failed to create like: %s", e.getMessage()));
         }
     }
 }

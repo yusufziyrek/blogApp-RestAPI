@@ -1,13 +1,16 @@
 package com.yusufziyrek.blogApp.like.application.usecases;
 
-import com.yusufziyrek.blogApp.like.domain.LikeDomain;
+import org.springframework.http.HttpStatus;
+
 import com.yusufziyrek.blogApp.like.application.ports.LikeRepository;
-import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
+import com.yusufziyrek.blogApp.like.domain.LikeDomain;
 import com.yusufziyrek.blogApp.post.application.ports.PostRepository;
 import com.yusufziyrek.blogApp.post.domain.PostDomain;
-import com.yusufziyrek.blogApp.shared.exception.UserException;
-import com.yusufziyrek.blogApp.shared.exception.PostException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.exception.LikeException;
+import com.yusufziyrek.blogApp.shared.exception.PostException;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
+import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
 
 public class LikePostUseCase {
     
@@ -22,20 +25,17 @@ public class LikePostUseCase {
     }
     
     public LikeDomain execute(Long userId, Long postId) {
-        // Kullanıcı var mı kontrol et (şimdilik sadece varlık kontrolü)
-        try {
-            userRepository.findById(userId).orElseThrow(() -> new UserException("UserDomain not found with id: " + userId));
-        } catch (Exception e) {
-            throw new UserException("UserDomain not found with id: " + userId);
-        }
+        // Kullanıcının varlığını kontrol et
+        userRepository.findById(userId)
+            .orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, userId), HttpStatus.NOT_FOUND));
         
         // Post var mı kontrol et ve beğeni sayısını güncellemek için yükle
         PostDomain post = postRepository.findById(postId)
-            .orElseThrow(() -> new PostException("PostDomain not found with id: " + postId));
+            .orElseThrow(() -> new PostException(String.format(ErrorMessages.POST_NOT_FOUND_BY_ID, postId), HttpStatus.NOT_FOUND));
         
         // Daha önce beğenilmiş mi kontrol et
         if (likeRepository.existsByUserIdAndPostId(userId, postId)) {
-            throw new LikeException("UserDomain has already liked this post");
+            throw new LikeException(ErrorMessages.LIKE_ALREADY_EXISTS_FOR_POST, HttpStatus.CONFLICT);
         }
         
         try {
@@ -53,7 +53,7 @@ public class LikePostUseCase {
             
             return savedLike;
         } catch (Exception e) {
-            throw new LikeException("Failed to create like: " + e.getMessage());
+            throw new LikeException(String.format("Failed to create like: %s", e.getMessage()));
         }
     }
 }

@@ -1,10 +1,13 @@
 package com.yusufziyrek.blogApp.user.application.usecases.impl;
 
+import org.springframework.http.HttpStatus;
+
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
 import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByEmailUseCase;
 import com.yusufziyrek.blogApp.user.domain.UserDomain;
 import com.yusufziyrek.blogApp.user.dto.response.UserResponse;
-import com.yusufziyrek.blogApp.shared.exception.UserException;
 
 /**
  * Implementation of GetUserByEmailUseCase
@@ -21,7 +24,7 @@ public class GetUserByEmailUseCaseImpl implements GetUserByEmailUseCase {
     @Override
     public UserResponse execute(String email) {
         UserDomain user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UserException("UserDomain not found with email: " + email));
+            .orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_EMAIL, email), HttpStatus.NOT_FOUND));
         
         return mapToResponse(user);
     }

@@ -1,10 +1,13 @@
 package com.yusufziyrek.blogApp.user.application.usecases.impl;
 
+import org.springframework.http.HttpStatus;
+
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
 import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByIdUseCase;
 import com.yusufziyrek.blogApp.user.domain.UserDomain;
 import com.yusufziyrek.blogApp.user.dto.response.UserResponse;
-import com.yusufziyrek.blogApp.shared.exception.UserException;
 
 /**
  * Implementation of GetUserByIdUseCase
@@ -21,7 +24,7 @@ public class GetUserByIdUseCaseImpl implements GetUserByIdUseCase {
     @Override
     public UserResponse execute(Long userId) {
         UserDomain user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserException("UserDomain not found with id: " + userId));
+            .orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, userId), HttpStatus.NOT_FOUND));
         
         return mapToResponse(user);
     }

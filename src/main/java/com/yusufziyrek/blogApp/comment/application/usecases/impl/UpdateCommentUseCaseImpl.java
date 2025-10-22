@@ -1,9 +1,12 @@
 package com.yusufziyrek.blogApp.comment.application.usecases.impl;
 
-import com.yusufziyrek.blogApp.comment.domain.CommentDomain;
+import org.springframework.http.HttpStatus;
+
 import com.yusufziyrek.blogApp.comment.application.ports.CommentRepository;
 import com.yusufziyrek.blogApp.comment.application.usecases.UpdateCommentUseCase;
+import com.yusufziyrek.blogApp.comment.domain.CommentDomain;
 import com.yusufziyrek.blogApp.shared.exception.CommentException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 
 public class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
     
@@ -17,11 +20,11 @@ public class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
     public CommentDomain execute(Long commentId, String newText, Long userId) {
         // Find comment
         CommentDomain comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommentException("CommentDomain not found"));
+                .orElseThrow(() -> new CommentException(ErrorMessages.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
         
         // Check if user can edit this comment (domain logic)
         if (!comment.canBeEditedBy(userId)) {
-            throw new CommentException("You are not authorized to edit this comment");
+            throw new CommentException(ErrorMessages.COMMENT_ACCESS_DENIED_UPDATE, HttpStatus.FORBIDDEN);
         }
         
         try {
@@ -31,7 +34,7 @@ public class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
             CommentDomain updatedComment = commentRepository.save(comment);
             return updatedComment;
         } catch (IllegalArgumentException e) {
-            throw new CommentException(e.getMessage());
+            throw new CommentException(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

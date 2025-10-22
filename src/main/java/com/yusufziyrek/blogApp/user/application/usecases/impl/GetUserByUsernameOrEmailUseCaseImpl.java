@@ -1,10 +1,13 @@
 package com.yusufziyrek.blogApp.user.application.usecases.impl;
 
+import org.springframework.http.HttpStatus;
+
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
 import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByUsernameOrEmailUseCase;
 import com.yusufziyrek.blogApp.user.domain.UserDomain;
 import com.yusufziyrek.blogApp.user.dto.response.UserResponse;
-import com.yusufziyrek.blogApp.shared.exception.UserException;
 
 /**
  * Implementation of GetUserByUsernameOrEmailUseCase
@@ -21,7 +24,7 @@ public class GetUserByUsernameOrEmailUseCaseImpl implements GetUserByUsernameOrE
     @Override
     public UserResponse execute(String usernameOrEmail) {
         UserDomain user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-            .orElseThrow(() -> new UserException("UserDomain not found with username or email: " + usernameOrEmail));
+            .orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_USERNAME_OR_EMAIL, usernameOrEmail), HttpStatus.NOT_FOUND));
         
         return mapToResponse(user);
     }
