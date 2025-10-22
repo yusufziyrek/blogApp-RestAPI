@@ -54,7 +54,7 @@ public class LikeCommentUseCase {
             
             return savedLike;
         } catch (Exception e) {
-            throw new LikeException(String.format("Failed to create like: %s", e.getMessage()));
+            throw new LikeException(String.format("Failed to create like: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

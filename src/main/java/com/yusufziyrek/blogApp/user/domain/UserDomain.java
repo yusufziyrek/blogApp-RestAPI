@@ -117,7 +117,7 @@ public class UserDomain {
     }
 
     public boolean hasValidAge() {
-        return age >= 0 && age <= 150;
+        return age >= 18 && age <= 100;
     }
 
     // Getter'lar
@@ -138,6 +138,11 @@ public class UserDomain {
     public void setId(Long id) { this.id = id; }
     public void setPassword(String password) { 
         this.password = password;
+        this.updatedDate = LocalDateTime.now();
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
         this.updatedDate = LocalDateTime.now();
     }
 }

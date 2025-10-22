@@ -8,6 +8,7 @@ import com.yusufziyrek.blogApp.comment.application.usecases.*;
 import com.yusufziyrek.blogApp.like.application.usecases.LikeCommentUseCase;
 import com.yusufziyrek.blogApp.like.application.usecases.UnlikeUseCase;
 import com.yusufziyrek.blogApp.like.application.usecases.GetCommentLikesUseCase;
+import com.yusufziyrek.blogApp.post.application.usecases.GetPostByIdUseCase;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByIdUseCase;
 import com.yusufziyrek.blogApp.comment.domain.CommentDomain;
 import com.yusufziyrek.blogApp.comment.dto.request.UpdateCommentRequest;
@@ -31,11 +32,12 @@ public class CommentApplicationService {
     private final UnlikeUseCase unlikeUseCase;
     private final GetCommentLikesUseCase getCommentLikesUseCase;
     private final GetUserByIdUseCase getUserByIdUseCase;
+    private final GetPostByIdUseCase getPostByIdUseCase;
     
     public CommentApplicationService(GetCommentByIdUseCase getCommentByIdUseCase, UpdateCommentUseCase updateCommentUseCase,
                                    DeleteCommentUseCase deleteCommentUseCase, LikeCommentUseCase likeCommentUseCase,
                                    UnlikeUseCase unlikeUseCase, GetCommentLikesUseCase getCommentLikesUseCase,
-                                   GetUserByIdUseCase getUserByIdUseCase) {
+                                   GetUserByIdUseCase getUserByIdUseCase, GetPostByIdUseCase getPostByIdUseCase) {
         this.getCommentByIdUseCase = getCommentByIdUseCase;
         this.updateCommentUseCase = updateCommentUseCase;
         this.deleteCommentUseCase = deleteCommentUseCase;
@@ -43,6 +45,7 @@ public class CommentApplicationService {
         this.unlikeUseCase = unlikeUseCase;
         this.getCommentLikesUseCase = getCommentLikesUseCase;
         this.getUserByIdUseCase = getUserByIdUseCase;
+        this.getPostByIdUseCase = getPostByIdUseCase;
     }
     
     public CommentResponse getCommentById(Long id) {
@@ -83,6 +86,7 @@ public class CommentApplicationService {
         response.setText(comment.getText());
         response.setLikeCount(comment.getLikeCount());
         response.setCreatedDate(comment.getCreatedDate());
+        response.setUpdatedDate(comment.getUpdatedDate());
         response.setPostId(comment.getPostId());
         
         // Cross-module data enrichment
@@ -93,6 +97,12 @@ public class CommentApplicationService {
         } catch (Exception e) {
             response.setAuthorUsername("Unknown");
             response.setAuthorFullName("Unknown User");
+        }
+
+        try {
+            response.setPostTitle(getPostByIdUseCase.execute(comment.getPostId()).getTitle());
+        } catch (Exception e) {
+            response.setPostTitle("Unknown Post");
         }
         
         return response;

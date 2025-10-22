@@ -1,7 +1,10 @@
 package com.yusufziyrek.blogApp.auth.application.usecases.impl;
 
+import org.springframework.http.HttpStatus;
+
 import com.yusufziyrek.blogApp.auth.application.usecases.RegisterUserUseCase;
 import com.yusufziyrek.blogApp.auth.dto.request.RegisterRequest;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 import com.yusufziyrek.blogApp.shared.exception.UserException;
 import com.yusufziyrek.blogApp.user.application.ports.PasswordEncoder;
 import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
@@ -32,12 +35,12 @@ public class RegisterUserUseCaseImpl implements RegisterUserUseCase {
         
         // Check if username already exists
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new UserException("Username '" + registerRequest.getUsername() + "' is already taken");
+            throw new UserException(String.format(ErrorMessages.USERNAME_ALREADY_EXISTS, registerRequest.getUsername()), HttpStatus.CONFLICT);
         }
         
         // Check if email already exists
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new UserException("Email '" + registerRequest.getEmail() + "' is already registered");
+            throw new UserException(String.format(ErrorMessages.EMAIL_ALREADY_EXISTS, registerRequest.getEmail()), HttpStatus.CONFLICT);
         }
         
         // Encode password
@@ -64,7 +67,7 @@ public class RegisterUserUseCaseImpl implements RegisterUserUseCase {
     
     private void validatePasswordsMatch(RegisterRequest registerRequest) {
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
-            throw new UserException("Password and confirm password do not match");
+            throw new UserException(ErrorMessages.PASSWORD_MISMATCH);
         }
     }
 }

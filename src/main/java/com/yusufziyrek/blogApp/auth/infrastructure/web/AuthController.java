@@ -23,7 +23,6 @@ import com.yusufziyrek.blogApp.auth.dto.response.AuthResponse;
 import com.yusufziyrek.blogApp.shared.dto.ApiResponse;
 import com.yusufziyrek.blogApp.shared.security.JwtUtil;
 import com.yusufziyrek.blogApp.shared.security.UserPrincipal;
-import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByUsernameOrEmailUseCase;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByIdUseCase;
 import com.yusufziyrek.blogApp.user.domain.UserDomain;
@@ -53,7 +52,6 @@ public class AuthController {
     private final RegisterUserUseCase registerUserUseCase;
     private final GetUserByUsernameOrEmailUseCase getUserByUsernameOrEmailUseCase;
     private final GetUserByIdUseCase getUserByIdUseCase;
-    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest registerRequest, HttpServletRequest request) {
@@ -86,12 +84,8 @@ public class AuthController {
             String deviceInfo = request.getHeader("User-Agent");
             String ipAddress = getClientIpAddress(request);
             
-            // Refresh token oluşturmak için UserDomain'i repo'dan çek
-            UserDomain userDomain = userRepository.findByEmail(userPrincipal.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-            
             RefreshTokenDomain refreshTokenDomain = createRefreshTokenUseCase.execute(
-                userDomain, 
+                minimalUser(userPrincipal.getId(), userPrincipal.getEmail()), 
                 deviceInfo != null ? deviceInfo : "Unknown Device", 
                 ipAddress
             );
@@ -142,12 +136,8 @@ public class AuthController {
             String deviceInfo = request.getHeader("User-Agent");
             String ipAddress = getClientIpAddress(request);
             
-            // Refresh token oluşturmak için UserDomain'i repodan al
-            UserDomain userDomain = userRepository.findByEmail(userPrincipal.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-            
             RefreshTokenDomain refreshTokenDomain = createRefreshTokenUseCase.execute(
-                userDomain, 
+                minimalUser(userPrincipal.getId(), userPrincipal.getEmail()), 
                 deviceInfo != null ? deviceInfo : "Unknown Device", 
                 ipAddress
             );
@@ -222,5 +212,12 @@ public class AuthController {
         }
         
         return request.getRemoteAddr();
+    }
+
+    private UserDomain minimalUser(Long userId, String email) {
+        UserDomain userDomain = new UserDomain();
+        userDomain.setId(userId);
+        userDomain.setEmail(email);
+        return userDomain;
     }
 }

@@ -121,10 +121,13 @@ public class PostApplicationService {
     }
     
     public List<CommentResponse> getCommentsForPost(Long postId, int page, int size) {
-        PageResponse<CommentDomain> pageResponse = getCommentsForPostUseCase.execute(postId, page, size);
-        return pageResponse.getItems().stream()
-                .map(this::mapToCommentResponse)
-                .collect(Collectors.toList());
+    PageResponse<CommentDomain> pageResponse = getCommentsForPostUseCase.execute(postId, page, size);
+    PostDomain post = getPostByIdUseCase.execute(postId);
+    String postTitle = post.getTitle();
+
+    return pageResponse.getItems().stream()
+        .map(comment -> mapToCommentResponse(comment, postTitle))
+        .collect(Collectors.toList());
     }
     
     public LikeResponse likePost(Long postId, Long userId) {
@@ -145,14 +148,25 @@ public class PostApplicationService {
                 .collect(Collectors.toList());
     }
     
-    private CommentResponse mapToCommentResponse(CommentDomain comment) {
+    private CommentResponse mapToCommentResponse(CommentDomain comment, String postTitle) {
         CommentResponse response = new CommentResponse();
         response.setId(comment.getId());
         response.setText(comment.getText());
         response.setLikeCount(comment.getLikeCount());
         response.setCreatedDate(comment.getCreatedDate());
+        response.setUpdatedDate(comment.getUpdatedDate());
         response.setPostId(comment.getPostId());
-        // Note: Author details will be enriched in Application Service layer
+        response.setPostTitle(postTitle);
+
+        try {
+            UserResponse user = getUserByIdUseCase.execute(comment.getUserId());
+            response.setAuthorUsername(user.getUsername());
+            response.setAuthorFullName(user.getFirstname() + " " + user.getLastname());
+        } catch (Exception ex) {
+            response.setAuthorUsername("Unknown");
+            response.setAuthorFullName("Unknown User");
+        }
+
         return response;
     }
     

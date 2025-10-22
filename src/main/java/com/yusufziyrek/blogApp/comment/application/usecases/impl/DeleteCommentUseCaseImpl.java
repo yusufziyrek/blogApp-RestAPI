@@ -1,11 +1,14 @@
 package com.yusufziyrek.blogApp.comment.application.usecases.impl;
 
-import com.yusufziyrek.blogApp.comment.domain.CommentDomain;
+import org.springframework.http.HttpStatus;
+
 import com.yusufziyrek.blogApp.comment.application.ports.CommentRepository;
 import com.yusufziyrek.blogApp.comment.application.usecases.DeleteCommentUseCase;
+import com.yusufziyrek.blogApp.comment.domain.CommentDomain;
 import com.yusufziyrek.blogApp.post.application.ports.PostRepository;
 import com.yusufziyrek.blogApp.post.domain.PostDomain;
 import com.yusufziyrek.blogApp.shared.exception.CommentException;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
 
 public class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
     
@@ -21,11 +24,11 @@ public class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
     public void execute(Long commentId, Long userId) {
         // Find comment
         CommentDomain comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommentException("CommentDomain not found"));
+                .orElseThrow(() -> new CommentException(ErrorMessages.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
         
         // Check if user can delete this comment (domain logic)
         if (!comment.canBeDeletedBy(userId)) {
-            throw new CommentException("You are not authorized to delete this comment");
+            throw new CommentException(ErrorMessages.COMMENT_ACCESS_DENIED_DELETE, HttpStatus.FORBIDDEN);
         }
         
         // Get post to update comment count
@@ -45,7 +48,7 @@ public class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
             }
             
         } catch (Exception e) {
-            throw new CommentException("Failed to delete comment: " + e.getMessage());
+            throw new CommentException(String.format("Failed to delete comment: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

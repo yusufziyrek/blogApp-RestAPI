@@ -7,11 +7,14 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import com.yusufziyrek.blogApp.post.application.ports.PostRepository;
 import com.yusufziyrek.blogApp.post.domain.PostDomain;
 import com.yusufziyrek.blogApp.post.infrastructure.mappers.PostMapper;
+import com.yusufziyrek.blogApp.shared.exception.ErrorMessages;
+import com.yusufziyrek.blogApp.shared.exception.UserException;
 import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
 import com.yusufziyrek.blogApp.user.domain.UserDomain;
 import com.yusufziyrek.blogApp.user.infrastructure.mappers.UserMapper;
@@ -32,9 +35,9 @@ public class PostRepositoryImpl implements PostRepository {
     
     @Override
     public PostDomain save(PostDomain post) {
-    // Post için user bilgisini alıyorum
+        // Post için user bilgisini alıyorum
         UserDomain userDomain = userRepository.findById(post.getUserId())
-            .orElseThrow(() -> new RuntimeException("UserDomain not found: " + post.getUserId()));
+            .orElseThrow(() -> new UserException(String.format(ErrorMessages.USER_NOT_FOUND_BY_ID, post.getUserId()), HttpStatus.NOT_FOUND));
         
         PostEntity entity = postMapper.toEntity(post, UserMapper.toEntity(userDomain));
         PostEntity savedEntity = jpaRepository.save(entity);

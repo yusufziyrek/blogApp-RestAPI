@@ -24,6 +24,7 @@ import com.yusufziyrek.blogApp.like.application.usecases.GetCommentLikesUseCase;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByIdUseCase;
 import com.yusufziyrek.blogApp.post.application.ports.PostRepository;
 import com.yusufziyrek.blogApp.user.application.ports.UserRepository;
+import com.yusufziyrek.blogApp.post.application.usecases.GetPostByIdUseCase;
 
 /**
  * Configuration for CommentDomain Module
@@ -75,7 +76,8 @@ public class CommentModuleConfiguration {
             LikeCommentUseCase likeCommentUseCase,
             UnlikeUseCase unlikeUseCase,
             GetCommentLikesUseCase getCommentLikesUseCase,
-            GetUserByIdUseCase getUserByIdUseCase) {
+            GetUserByIdUseCase getUserByIdUseCase,
+            GetPostByIdUseCase getPostByIdUseCase) {
         return new CommentApplicationService(
                 getCommentByIdUseCase,
                 updateCommentUseCase,
@@ -83,7 +85,8 @@ public class CommentModuleConfiguration {
                 likeCommentUseCase,
                 unlikeUseCase,
                 getCommentLikesUseCase,
-                getUserByIdUseCase
+                getUserByIdUseCase,
+                getPostByIdUseCase
         );
     }
 }
