@@ -327,6 +327,6 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ---
 
-[![Java](https://img.shields.io/badge/Java-24-orange.svg)](https://openjdk.java.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.java.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)]()
