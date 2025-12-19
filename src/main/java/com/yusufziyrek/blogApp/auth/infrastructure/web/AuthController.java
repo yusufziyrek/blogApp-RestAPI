@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +34,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Authentication Controller
  * Clean Architecture - Infrastructure Layer (Web)
@@ -54,55 +58,53 @@ public class AuthController {
     private final GetUserByIdUseCase getUserByIdUseCase;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest registerRequest, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest registerRequest,
+            HttpServletRequest request) {
         log.info("Registration attempt for email: {}", registerRequest.getEmail());
-        
+
         try {
             // Kullanıcı kaydı
             UserResponse userResponse = registerUserUseCase.execute(registerRequest);
-            
-            log.info("User registered successfully with ID: {} and email: {}", 
+
+            log.info("User registered successfully with ID: {} and email: {}",
                     userResponse.getId(), userResponse.getEmail());
-            
+
             // Kayıt olan kullanıcıyı otomatik oturum açtır
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    registerRequest.getEmail(),
-                    registerRequest.getPassword()
-                )
-            );
+                    new UsernamePasswordAuthenticationToken(
+                            registerRequest.getEmail(),
+                            registerRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Kullanıcı detaylarını al
             UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-            // JWT token üret
-            String accessToken = jwtUtil.generateToken(userPrincipal.getEmail(), userPrincipal.getId());
+            // JWT token üret (Rolleri token'a ekle)
+            String accessToken = jwtUtil.generateToken(userPrincipal.getEmail(), userPrincipal.getId(),
+                    userPrincipal.getAuthorities());
 
             // Cihaz ve IP bilgisiyle refresh token oluştur
             String deviceInfo = request.getHeader("User-Agent");
             String ipAddress = getClientIpAddress(request);
-            
+
             RefreshTokenDomain refreshTokenDomain = createRefreshTokenUseCase.execute(
-                minimalUser(userPrincipal.getId(), userPrincipal.getEmail()), 
-                deviceInfo != null ? deviceInfo : "Unknown Device", 
-                ipAddress
-            );
+                    minimalUser(userPrincipal.getId(), userPrincipal.getEmail()),
+                    deviceInfo != null ? deviceInfo : "Unknown Device",
+                    ipAddress);
 
             // Süreyi hesapla (ms -> s)
             Long expiresIn = 3600L; // 1 hour default
 
             AuthResponse authResponse = new AuthResponse(
-                accessToken,
-                refreshTokenDomain.getToken(),
-                expiresIn,
-                userResponse
-            );
-            
+                    accessToken,
+                    refreshTokenDomain.getToken(),
+                    expiresIn,
+                    userResponse);
+
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(true, "User registered and authenticated successfully", authResponse));
-                    
+
         } catch (Exception e) {
             log.error("Registration failed for email: {} - {}", registerRequest.getEmail(), e.getMessage());
             return ResponseEntity.badRequest()
@@ -111,17 +113,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request) {
         log.info("Login attempt for user: {}", loginRequest.getUsernameOrEmail());
 
         try {
             // Kullanıcıyı doğrula (authenticate)
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsernameOrEmail(),
-                    loginRequest.getPassword()
-                )
-            );
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsernameOrEmail(),
+                            loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -129,28 +130,27 @@ public class AuthController {
             UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
             UserResponse userResponse = getUserByUsernameOrEmailUseCase.execute(loginRequest.getUsernameOrEmail());
 
-            // JWT token üret
-            String accessToken = jwtUtil.generateToken(userPrincipal.getEmail(), userPrincipal.getId());
+            // JWT token üret (Rolleri token'a ekle)
+            String accessToken = jwtUtil.generateToken(userPrincipal.getEmail(), userPrincipal.getId(),
+                    userPrincipal.getAuthorities());
 
             // Cihaz ve IP bilgisiyle refresh token oluştur
             String deviceInfo = request.getHeader("User-Agent");
             String ipAddress = getClientIpAddress(request);
-            
+
             RefreshTokenDomain refreshTokenDomain = createRefreshTokenUseCase.execute(
-                minimalUser(userPrincipal.getId(), userPrincipal.getEmail()), 
-                deviceInfo != null ? deviceInfo : "Unknown Device", 
-                ipAddress
-            );
+                    minimalUser(userPrincipal.getId(), userPrincipal.getEmail()),
+                    deviceInfo != null ? deviceInfo : "Unknown Device",
+                    ipAddress);
 
             // Süre hesaplaması (ms -> s)
             Long expiresIn = 3600L; // 1 hour default
 
             AuthResponse authResponse = new AuthResponse(
-                accessToken,
-                refreshTokenDomain.getToken(),
-                expiresIn,
-                userResponse
-            );
+                    accessToken,
+                    refreshTokenDomain.getToken(),
+                    expiresIn,
+                    userResponse);
 
             log.info("User logged in successfully: {}", loginRequest.getUsernameOrEmail());
 
@@ -159,32 +159,38 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Login failed for user: {} - {}", loginRequest.getUsernameOrEmail(), e.getMessage());
             return ResponseEntity.badRequest()
-                .body(new ApiResponse<>(false, "Invalid username/email or password", null));
+                    .body(new ApiResponse<>(false, "Invalid username/email or password", null));
         }
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshRequest) {
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest refreshRequest) {
         log.info("Token refresh attempt");
 
         try {
             // Refresh token'ı doğrula
-            RefreshTokenDomain refreshTokenDomain = validateRefreshTokenUseCase.execute(refreshRequest.getRefreshToken());
+            RefreshTokenDomain refreshTokenDomain = validateRefreshTokenUseCase
+                    .execute(refreshRequest.getRefreshToken());
 
             // ID ile kullanıcı bilgilerini al
             UserResponse userResponse = getUserByIdUseCase.execute(refreshTokenDomain.getUserId());
 
-            // Yeni erişim token'ı oluştur
-            String newAccessToken = jwtUtil.generateToken(userResponse.getEmail(), refreshTokenDomain.getUserId());
+            // Rol bilgisini al ve listeye çevir
+            Collection<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                    new SimpleGrantedAuthority("ROLE_" + userResponse.getRole().name()));
+
+            // Yeni erişim token'ı oluştur (Rolleri ekle)
+            String newAccessToken = jwtUtil.generateToken(userResponse.getEmail(), refreshTokenDomain.getUserId(),
+                    authorities);
 
             Long expiresIn = 3600L; // 1 hour default
 
             AuthResponse authResponse = new AuthResponse(
-                newAccessToken,
-                refreshRequest.getRefreshToken(), // Keep the same refresh token
-                expiresIn,
-                userResponse
-            );
+                    newAccessToken,
+                    refreshRequest.getRefreshToken(), // Keep the same refresh token
+                    expiresIn,
+                    userResponse);
 
             log.info("Token refreshed successfully for user ID: {}", refreshTokenDomain.getUserId());
 
@@ -193,7 +199,7 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Token refresh failed: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                .body(new ApiResponse<>(false, "Invalid or expired refresh token", null));
+                    .body(new ApiResponse<>(false, "Invalid or expired refresh token", null));
         }
     }
 
@@ -205,12 +211,12 @@ public class AuthController {
         if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
             return xForwardedFor.split(",")[0].trim();
         }
-        
+
         String xRealIp = request.getHeader("X-Real-IP");
         if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
             return xRealIp;
         }
-        
+
         return request.getRemoteAddr();
     }
 

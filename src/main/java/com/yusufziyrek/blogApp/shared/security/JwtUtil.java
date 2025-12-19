@@ -4,10 +4,12 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Date;
 
 @Component
@@ -20,28 +22,44 @@ public class JwtUtil {
 
     public JwtUtil(
             @Value("${jwt.secret-key}") String secret,
-            @Value("${jwt.expiration-time}") long expirationTime
-    ) {
+            @Value("${jwt.expiration-time}") long expirationTime) {
         byte[] decodedKey = Base64.getDecoder().decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(decodedKey);
         this.expirationTime = expirationTime;
-    this.refreshExpirationTime = expirationTime * 24; // refresh token için 24 kat daha uzun
+        this.refreshExpirationTime = expirationTime * 24; // refresh token için 24 kat daha uzun
     }
 
-    public String generateToken(String email, Long userId) {
+    public String generateToken(String email, Long userId, Collection<? extends GrantedAuthority> authorities) {
         log.info("Generating JWT token for user: {}", email);
         return Jwts.builder()
                 .setSubject(email)
                 .claim("id", userId)
+                .claim("roles", authorities.stream().map(GrantedAuthority::getAuthority).toList())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    /**
+     * Token'ı parse eder ve tüm claimleri döner.
+     * İmza hatalıysa veya sure dolmuşsa JwtException fırlatır.
+     */
+    public Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    // Geriye dönük uyumluluk veya kolay kullanım için wrapper metodlar
+    // Ancak en performanslı yöntem `extractAllClaims` ile claimleri bir kere alıp
+    // oradan okumaktır.
+
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
+            extractAllClaims(token);
             return true;
         } catch (JwtException e) {
             log.warn("Invalid JWT token: {}", e.getMessage());
@@ -50,23 +68,13 @@ public class JwtUtil {
     }
 
     public String extractEmail(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractAllClaims(token).getSubject();
     }
 
     public Long extractUserId(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("id", Long.class);
+        return extractAllClaims(token).get("id", Long.class);
     }
-    
+
     public String generateRefreshToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -76,27 +84,17 @@ public class JwtUtil {
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
-    
+
     public boolean validateRefreshToken(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-            
+            Claims claims = extractAllClaims(token);
             return "refresh".equals(claims.get("type", String.class));
         } catch (JwtException e) {
             return false;
         }
     }
-    
+
     public String extractEmailFromRefreshToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractAllClaims(token).getSubject();
     }
 }
