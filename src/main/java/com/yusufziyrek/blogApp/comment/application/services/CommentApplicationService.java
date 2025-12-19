@@ -113,7 +113,6 @@ public class CommentApplicationService {
         response.setId(like.getId());
         response.setUserId(like.getUserId());
         response.setPostId(like.getPostId());
-        response.setCommentId(like.getCommentId());
         response.setCreatedDate(like.getCreatedDate());
         
         // Cross-module data enrichment
@@ -123,7 +122,14 @@ public class CommentApplicationService {
         } catch (Exception e) {
             response.setUserFullName("Unknown User");
         }
-        
+        if (like.getPostId() != null) {
+            try {
+                response.setPostTitle(getPostByIdUseCase.execute(like.getPostId()).getTitle());
+            } catch (Exception e) {
+                response.setPostTitle("Unknown Post");
+            }
+        }
+
         return response;
     }
 }

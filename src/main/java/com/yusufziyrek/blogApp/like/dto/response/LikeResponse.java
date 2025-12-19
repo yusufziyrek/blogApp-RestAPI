@@ -16,6 +16,5 @@ public class LikeResponse {
     private String userFullName;
     private Long postId;
     private String postTitle;
-    private Long commentId;
     private LocalDateTime createdDate;
 }

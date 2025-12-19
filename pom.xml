@@ -37,7 +37,7 @@
 	
 	<properties>
 		<java.version>25</java.version>
-		<lombok.version>1.18.38</lombok.version>
+		<lombok.version>1.18.42</lombok.version>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
 	</properties>
 	<dependencies>
@@ -102,10 +102,6 @@
         	<version>0.11.5</version>
         	<scope>runtime</scope>
     	</dependency>
-    	<dependency>
-    		<groupId>com.github.ben-manes.caffeine</groupId>
-    		<artifactId>caffeine</artifactId>
-		</dependency>
 
 	</dependencies>
 

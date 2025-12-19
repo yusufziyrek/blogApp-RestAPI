@@ -175,8 +175,21 @@ public class PostApplicationService {
         response.setId(like.getId());
         response.setUserId(like.getUserId());
         response.setPostId(like.getPostId());
-        response.setCommentId(like.getCommentId());
         response.setCreatedDate(like.getCreatedDate());
+        try {
+            UserResponse user = getUserByIdUseCase.execute(like.getUserId());
+            response.setUserFullName(user.getFirstname() + " " + user.getLastname());
+        } catch (Exception ex) {
+            response.setUserFullName("Unknown User");
+        }
+        if (like.getPostId() != null) {
+            try {
+                PostDomain post = getPostByIdUseCase.execute(like.getPostId());
+                response.setPostTitle(post.getTitle());
+            } catch (Exception ex) {
+                response.setPostTitle("Unknown Post");
+            }
+        }
         return response;
     }
 }
