@@ -1,6 +1,7 @@
 package com.yusufziyrek.blogApp.auth.infrastructure.persistence;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
@@ -9,19 +10,18 @@ import com.yusufziyrek.blogApp.user.infrastructure.persistence.entity.UserEntity
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(
-    name = "refresh_tokens",
-    indexes = {
+@Table(name = "refresh_tokens", indexes = {
         @Index(name = "idx_refresh_tokens_token", columnList = "token"),
         @Index(name = "idx_refresh_tokens_user_id", columnList = "user_id"),
         @Index(name = "idx_refresh_tokens_expires_at", columnList = "expiresAt")
-    }
-)
-@Data
+})
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicUpdate
@@ -66,12 +66,26 @@ public class RefreshTokenEntity {
             isRevoked = false;
         }
     }
-    
+
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(this.expiresAt);
     }
-    
+
     public boolean isActive() {
         return !this.isRevoked && !isExpired();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof RefreshTokenEntity that))
+            return false;
+        return id != null && Objects.equals(id, that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

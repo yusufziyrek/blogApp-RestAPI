@@ -26,6 +26,7 @@ import com.yusufziyrek.blogApp.like.application.usecases.LikePostUseCase;
 import com.yusufziyrek.blogApp.like.application.usecases.UnlikeUseCase;
 import com.yusufziyrek.blogApp.like.application.usecases.GetPostLikesUseCase;
 import com.yusufziyrek.blogApp.user.application.usecases.GetUserByIdUseCase;
+import com.yusufziyrek.blogApp.user.application.usecases.GetUsersByIdsUseCase;
 import com.yusufziyrek.blogApp.post.infrastructure.mappers.PostMapper;
 
 /**
@@ -34,44 +35,44 @@ import com.yusufziyrek.blogApp.post.infrastructure.mappers.PostMapper;
  */
 @Configuration
 @ComponentScan(basePackages = {
-    "com.yusufziyrek.blogApp.post.infrastructure.persistence",
-    "com.yusufziyrek.blogApp.post.infrastructure.web",
-    "com.yusufziyrek.blogApp.post.infrastructure.mappers"
+        "com.yusufziyrek.blogApp.post.infrastructure.persistence",
+        "com.yusufziyrek.blogApp.post.infrastructure.web",
+        "com.yusufziyrek.blogApp.post.infrastructure.mappers"
 })
 @EntityScan(basePackages = "com.yusufziyrek.blogApp.post.infrastructure.persistence")
 @EnableJpaRepositories(basePackages = "com.yusufziyrek.blogApp.post.infrastructure.persistence")
 public class PostModuleConfiguration {
-    
+
     @Bean
     public CreatePostUseCase createPostUseCase(PostRepository postRepository) {
         return new CreatePostUseCaseImpl(postRepository);
     }
-    
+
     @Bean
     public GetPostByIdUseCase getPostByIdUseCase(PostRepository postRepository) {
         return new GetPostByIdUseCaseImpl(postRepository);
     }
-    
+
     @Bean
     public GetAllPostsUseCase getAllPostsUseCase(PostRepository postRepository) {
         return new GetAllPostsUseCaseImpl(postRepository);
     }
-    
+
     @Bean
     public UpdatePostUseCase updatePostUseCase(PostRepository postRepository) {
         return new UpdatePostUseCaseImpl(postRepository);
     }
-    
+
     @Bean
     public GetPostsByUserIdUseCase getPostsByUserIdUseCase(PostRepository postRepository) {
         return new GetPostsByUserIdUseCaseImpl(postRepository);
     }
-    
+
     @Bean
     public DeletePostUseCase deletePostUseCase(PostRepository postRepository) {
         return new DeletePostUseCaseImpl(postRepository);
     }
-    
+
     @Bean
     public PostApplicationService postApplicationService(
             CreatePostUseCase createPostUseCase,
@@ -86,6 +87,7 @@ public class PostModuleConfiguration {
             UnlikeUseCase unlikeUseCase,
             GetPostLikesUseCase getPostLikesUseCase,
             GetUserByIdUseCase getUserByIdUseCase,
+            GetUsersByIdsUseCase getUsersByIdsUseCase,
             PostMapper postMapper) {
         return new PostApplicationService(
                 createPostUseCase,
@@ -100,7 +102,7 @@ public class PostModuleConfiguration {
                 unlikeUseCase,
                 getPostLikesUseCase,
                 getUserByIdUseCase,
-                postMapper
-        );
+                getUsersByIdsUseCase,
+                postMapper);
     }
 }
