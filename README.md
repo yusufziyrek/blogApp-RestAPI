@@ -1,7 +1,7 @@
 ### BlogApp-RestAPI Documentation
 
 **Overview:**  
-BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts, comments, and likes. It provides comprehensive CRUD operations for users, posts, comments, and likes, offering a fully-featured blog experience with secure authentication, role-based authorization, email verification, and caching for enhanced performance.
+BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts, comments, and likes. It provides comprehensive CRUD operations for users, posts, comments, and likes, offering a fully-featured blog experience with secure authentication and role-based authorization.
 
 ---
 
@@ -16,15 +16,11 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
   Secured endpoints with JWT-based authentication, refresh token rotation, device tracking, and role-based access control.
 - **Advanced Token Management:**  
   Persistent refresh tokens with automatic cleanup, session limits, and secure logout functionality.
-- **Email Verification:**  
-  New users must verify their email addresses to activate their accounts. A verification link is sent upon registration.
-- **Caching with Caffeine:**  
-  Frequently accessed data (such as blog posts and comments) is cached using Caffeine Cache, reducing database load and improving response times.
 
 ---
 
 ### **2. Tech Stack:**
-- **Java 25 & Spring Boot:**  
+- **Java 25 & Spring Boot 3.5.6:**  
   API development, dependency injection, and MVC architecture.
 - **Spring Data JPA:**  
   Simplifies database interactions.
@@ -32,8 +28,8 @@ BlogApp-RestAPI is a RESTful API that enables users to interact with blog posts,
   Project management and dependency tool.
 - **Spring Security & JWT:**  
   Provides secure authentication and authorization.
-- **Caffeine Cache:**  
-  High-performance caching library integrated to cache frequently accessed endpoints.
+- **PostgreSQL:**  
+  Primary database for persistent storage.
 
 ---
 
@@ -76,10 +72,8 @@ Cross-cutting concerns live under `shared/` (Security/JWT, CORS/Cache config, ex
   Stores comments related to posts (ID, userId, postId, likeCount, timestamps, etc.).
 - **Likes:**  
   Stores likes on posts and comments (ID, userId, postId, commentId, timestamps, etc.).
-- **JWT Tokens:**  
-  Used for authentication and authorization.
-- **Email Verification Tokens:**  
-  Stores tokens used for verifying user email addresses.
+- **Refresh Tokens:**  
+  Persistent refresh tokens with device tracking for secure session management.
 
 ---
 
@@ -177,32 +171,14 @@ Cross-cutting concerns live under `shared/` (Security/JWT, CORS/Cache config, ex
 - **Security Features:**  
   - **Token Revocation:** Logout revokes refresh tokens immediately
   - **Role-Based Access:** Spring Security integration with method-level permissions
-  - **Expiration Handling:** Separate expiration times for access (1h) and refresh tokens (30 days)
+  - **Expiration Handling:** Separate expiration times for access (1h) and refresh tokens (24h)
   - **Device Management:** Track and limit active sessions per user
-- **Email Verification Flow:**  
-  1. **User Registration:** User registers via `POST /api/v1/auth/register`.  
-  2. **Verification Link:** An email is sent with a verification link.  
-  3. **Account Activation:** User activates their account by visiting `GET /api/v1/auth/verify?token=<TOKEN>`.  
-  4. **Authentication:** Once verified, the user can log in and receive a JWT token.
+
+
 
 ---
 
-### **6. Caching with Caffeine Cache**
-
-To improve performance and reduce database load, BlogApp-RestAPI integrates **Caffeine Cache**:
-
-- **Purpose:**  
-  Frequently accessed data—such as blog posts, comments, and likes—is cached to speed up read operations.
-- **Usage:**  
-  Caching is applied on service methods (typically on GET operations) to store the results for a specified duration. Cache invalidation is triggered on data modifications (POST, PUT, DELETE) to prevent stale data.
-- **Benefits:**  
-  - **Reduced Database Load:** Minimizes repetitive database queries for frequently requested data.
-  - **Faster Response Times:** Delivers cached results quickly, enhancing overall application performance.
-  - **Scalability:** Supports high traffic by reducing expensive database operations.
-
----
-
-### **7. Project Setup & Execution**
+### **6. Project Setup & Execution**
 
 1. **Clone the Repository:**  
    ```bash
@@ -260,20 +236,19 @@ To improve performance and reduce database load, BlogApp-RestAPI integrates **Ca
           -H "Content-Type: application/json" \
           -d '{"refreshToken":"your_refresh_token_here"}'
      ```
-   - **Email Verification:**  
-     Check your inbox for a verification link and open it in a browser (e.g., `GET /auth/verify?token=<TOKEN>`).
 6. **Database Configuration:**  
    Update the relevant properties in `application.properties` (or `application.yml`) to point to your preferred database (MySQL, PostgreSQL, etc.).
 
 ---
 
-### **8. Future Improvements:**
+### **7. Future Improvements:**
+- **Email Verification:** Add email verification for new user registrations.
+- **Caffeine Cache:** Integrate caching for frequently accessed endpoints.
 - **OAuth2 Support:** Enable social login via Google and GitHub.
 - **2FA (Two-Factor Authentication):** Enhance security with OTP-based login.
 - **Device Management:** Web interface for users to manage their active sessions.
 - **Advanced Token Analytics:** Track token usage patterns and suspicious activities.
 - **Admin Panel:** Provide a web interface for managing users, posts, and comments.
-- **Advanced Cache Strategies:** Explore more sophisticated caching strategies and cache eviction policies as the project scales.
 
 For more information, check the [GitHub repository](https://github.com/yusufziyrek/blogApp-RestAPI).
 
@@ -327,6 +302,6 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ---
 
-[![Java](https://img.shields.io/badge/Java-24-orange.svg)](https://openjdk.java.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.java.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)]()
