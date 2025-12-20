@@ -3,6 +3,7 @@ package com.yusufziyrek.blogApp.user.application.ports;
 import com.yusufziyrek.blogApp.user.domain.UserDomain;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Port (Interface) for UserDomain Repository
@@ -10,13 +11,24 @@ import java.util.Optional;
  */
 public interface UserRepository {
     List<UserDomain> findAll(int page, int size);
+
     Optional<UserDomain> findById(Long id);
+
     Optional<UserDomain> findByUsername(String username);
+
     Optional<UserDomain> findByEmail(String email);
+
     Optional<UserDomain> findByUsernameOrEmail(String username, String email);
+
     UserDomain save(UserDomain user);
+
+    List<UserDomain> findByIds(Set<Long> ids);
+
     boolean existsByUsername(String username);
+
     boolean existsByEmail(String email);
+
     void deleteById(Long id);
+
     long getTotalCount();
 }

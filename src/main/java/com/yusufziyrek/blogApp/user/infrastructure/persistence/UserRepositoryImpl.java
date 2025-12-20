@@ -20,72 +20,83 @@ import java.util.stream.Collectors;
  */
 @Component
 public class UserRepositoryImpl implements UserRepository {
-    
+
     private final JpaUserRepository jpaUserRepository;
-    
+
     public UserRepositoryImpl(JpaUserRepository jpaUserRepository) {
         this.jpaUserRepository = jpaUserRepository;
     }
-    
+
     @Override
     public UserDomain save(UserDomain user) {
         UserEntity entity = UserMapper.toEntity(user);
         UserEntity savedEntity = jpaUserRepository.save(entity);
         return UserMapper.toDomain(savedEntity);
     }
-    
+
     @Override
     public Optional<UserDomain> findById(Long id) {
         return jpaUserRepository.findById(id)
-            .map(UserMapper::toDomain);
+                .map(UserMapper::toDomain);
     }
-    
+
     @Override
     public Optional<UserDomain> findByUsername(String username) {
         return jpaUserRepository.findByUsername(username)
-            .map(UserMapper::toDomain);
+                .map(UserMapper::toDomain);
     }
-    
+
     @Override
     public Optional<UserDomain> findByEmail(String email) {
         return jpaUserRepository.findByEmail(email)
-            .map(UserMapper::toDomain);
+                .map(UserMapper::toDomain);
     }
-    
+
     @Override
     public Optional<UserDomain> findByUsernameOrEmail(String username, String email) {
         return jpaUserRepository.findByUsernameOrEmail(username, email)
-            .map(UserMapper::toDomain);
+                .map(UserMapper::toDomain);
     }
-    
+
     @Override
     public boolean existsByUsername(String username) {
         return jpaUserRepository.existsByUsername(username);
     }
-    
+
     @Override
     public boolean existsByEmail(String email) {
         return jpaUserRepository.existsByEmail(email);
     }
-    
+
     @Override
     public void deleteById(Long id) {
         jpaUserRepository.deleteById(id);
     }
-    
+
     @Override
     public List<UserDomain> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserEntity> entityPage = jpaUserRepository.findAll(pageable);
-        
+
         return entityPage.getContent()
-            .stream()
-            .map(UserMapper::toDomain)
-            .collect(Collectors.toList());
+                .stream()
+                .map(UserMapper::toDomain)
+                .collect(Collectors.toList());
     }
-    
+
     @Override
     public long getTotalCount() {
         return jpaUserRepository.count();
+    }
+
+    @Override
+    public List<UserDomain> findByIds(java.util.Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        return jpaUserRepository.findAllById(ids)
+                .stream()
+                .map(UserMapper::toDomain)
+                .collect(Collectors.toList());
     }
 }

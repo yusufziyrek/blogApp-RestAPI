@@ -18,12 +18,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     // Domain'e özel istisnalar
     @ExceptionHandler(UserException.class)
     public ResponseEntity<CustomProblemDetail> handleUserException(UserException ex, WebRequest request) {
+        log.warn("User exception: {}", ex.getMessage());
         HttpStatus status = ex.getStatus();
         CustomProblemDetail detail = buildProblemDetail(status, ex.getMessage(), request);
         return ResponseEntity.status(status).body(detail);
@@ -31,6 +35,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PostException.class)
     public ResponseEntity<CustomProblemDetail> handlePostException(PostException ex, WebRequest request) {
+        log.warn("Post exception: {}", ex.getMessage());
         HttpStatus status = ex.getStatus();
         CustomProblemDetail detail = buildProblemDetail(status, ex.getMessage(), request);
         return ResponseEntity.status(status).body(detail);
@@ -38,6 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CommentException.class)
     public ResponseEntity<CustomProblemDetail> handleCommentException(CommentException ex, WebRequest request) {
+        log.warn("Comment exception: {}", ex.getMessage());
         HttpStatus status = ex.getStatus();
         CustomProblemDetail detail = buildProblemDetail(status, ex.getMessage(), request);
         return ResponseEntity.status(status).body(detail);
@@ -45,6 +51,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LikeException.class)
     public ResponseEntity<CustomProblemDetail> handleLikeException(LikeException ex, WebRequest request) {
+        log.warn("Like exception: {}", ex.getMessage());
         HttpStatus status = ex.getStatus();
         CustomProblemDetail detail = buildProblemDetail(status, ex.getMessage(), request);
         return ResponseEntity.status(status).body(detail);
@@ -52,6 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<CustomProblemDetail> handleAuthException(AuthException ex, WebRequest request) {
+        log.warn("Auth exception: {}", ex.getMessage());
         HttpStatus status = ex.getStatus();
         CustomProblemDetail detail = buildProblemDetail(status, ex.getMessage(), request);
         return ResponseEntity.status(status).body(detail);
@@ -61,7 +69,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CustomProblemDetail> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
-        
+
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -69,7 +77,8 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.VALIDATION_FAILED, request);
+        CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.VALIDATION_FAILED,
+                request);
         detail.setValidationErrors(errors);
 
         return ResponseEntity.badRequest().body(detail);
@@ -77,28 +86,34 @@ public class GlobalExceptionHandler {
 
     // Kimlik doğrulama hataları
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<CustomProblemDetail> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
-    CustomProblemDetail detail = buildProblemDetail(HttpStatus.UNAUTHORIZED, ErrorMessages.AUTHENTICATION_REQUIRED, request);
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(detail);
+    public ResponseEntity<CustomProblemDetail> handleAuthenticationException(AuthenticationException ex,
+            WebRequest request) {
+        CustomProblemDetail detail = buildProblemDetail(HttpStatus.UNAUTHORIZED, ErrorMessages.AUTHENTICATION_REQUIRED,
+                request);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(detail);
     }
 
     // Yetkilendirme hataları
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<CustomProblemDetail> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-    CustomProblemDetail detail = buildProblemDetail(HttpStatus.FORBIDDEN, ErrorMessages.ACCESS_DENIED, request);
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(detail);
+    public ResponseEntity<CustomProblemDetail> handleAccessDeniedException(AccessDeniedException ex,
+            WebRequest request) {
+        CustomProblemDetail detail = buildProblemDetail(HttpStatus.FORBIDDEN, ErrorMessages.ACCESS_DENIED, request);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(detail);
     }
 
     // Geçersiz istek hataları
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<CustomProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
-    CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.INVALID_ARGUMENT, request);
-    return ResponseEntity.badRequest().body(detail);
+    public ResponseEntity<CustomProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex,
+            WebRequest request) {
+        CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.INVALID_ARGUMENT,
+                request);
+        return ResponseEntity.badRequest().body(detail);
     }
 
     // Tip uyumsuzluğu hataları
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<CustomProblemDetail> handleTypeMismatchException(MethodArgumentTypeMismatchException ex, WebRequest request) {
+    public ResponseEntity<CustomProblemDetail> handleTypeMismatchException(MethodArgumentTypeMismatchException ex,
+            WebRequest request) {
         String message = "me".equals(ex.getValue())
                 ? ErrorMessages.INVALID_ENDPOINT_USAGE
                 : ErrorMessages.INVALID_PARAMETER_FORMAT;
@@ -109,22 +124,27 @@ public class GlobalExceptionHandler {
 
     // JSON ayrıştırma hataları
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<CustomProblemDetail> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, WebRequest request) {
-    CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.INVALID_PAYLOAD_FORMAT, request);
-    return ResponseEntity.badRequest().body(detail);
+    public ResponseEntity<CustomProblemDetail> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex,
+            WebRequest request) {
+        CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.INVALID_PAYLOAD_FORMAT,
+                request);
+        return ResponseEntity.badRequest().body(detail);
     }
 
     // Null pointer hataları
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<CustomProblemDetail> handleNullPointerException(NullPointerException ex, WebRequest request) {
-    CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.REQUIRED_FIELDS_MISSING, request);
-    return ResponseEntity.badRequest().body(detail);
+        CustomProblemDetail detail = buildProblemDetail(HttpStatus.BAD_REQUEST, ErrorMessages.REQUIRED_FIELDS_MISSING,
+                request);
+        return ResponseEntity.badRequest().body(detail);
     }
 
     // Genel exception handler (bilinmeyen hatalar için)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomProblemDetail> handleGeneralException(Exception ex, WebRequest request) {
-        CustomProblemDetail detail = buildProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessages.INTERNAL_SERVER_ERROR, request);
+        log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
+        CustomProblemDetail detail = buildProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR,
+                ErrorMessages.INTERNAL_SERVER_ERROR, request);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(detail);
     }
 
@@ -142,7 +162,6 @@ public class GlobalExceptionHandler {
                 message,
                 request.getDescription(false).replace("uri=", ""),
                 getMachineName(),
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 }

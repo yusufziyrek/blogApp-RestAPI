@@ -22,11 +22,12 @@ public class JwtUtil {
 
     public JwtUtil(
             @Value("${jwt.secret-key}") String secret,
-            @Value("${jwt.expiration-time}") long expirationTime) {
+            @Value("${jwt.expiration-time}") long expirationTime,
+            @Value("${jwt.refresh-token.expiration-ms}") long refreshExpirationTime) {
         byte[] decodedKey = Base64.getDecoder().decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(decodedKey);
         this.expirationTime = expirationTime;
-        this.refreshExpirationTime = expirationTime * 24; // refresh token için 24 kat daha uzun
+        this.refreshExpirationTime = refreshExpirationTime;
     }
 
     public String generateToken(String email, Long userId, Collection<? extends GrantedAuthority> authorities) {
